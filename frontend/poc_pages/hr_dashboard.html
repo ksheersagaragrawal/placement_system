@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dashboard</title>
+	<style>
+		body {
+			background-color: #F9F9F9;
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		.container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 30px;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			width: 100%;
+			padding-bottom: 20px;
+			border-bottom: 1px solid #ccc;
+			margin-bottom: 30px;
+		}
+		.logo {
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.navigation {
+			display: flex;
+			align-items: center;
+		}
+		.navigation a {
+			margin-right: 20px;
+			color: #333;
+			text-decoration: none;
+			font-size: 18px;
+			font-weight: bold;
+			transition: all 0.2s ease;
+		}
+		.navigation a:hover {
+			color: #666;
+		}
+		.navigation a.active {
+			color: #333;
+			border-bottom: 3px solid #333;
+			padding-bottom: 3px;
+		}
+		.content {
+			width: 100%;
+			max-width: 800px;
+			background-color: #fff;
+			padding: 30px;
+			border-radius: 10px;
+			box-shadow: 0px 5px 10px rgba(0,0,0,0.2);
+			text-align: center;
+		}
+		.content h2 {
+			font-size: 28px;
+			font-weight: bold;
+			margin-bottom: 30px;
+		}
+		.button {
+			display: inline-block;
+			padding: 10px 20px;
+			background-color: #333;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-top: 20px;
+			transition: all 0.2s ease;
+		}
+		.button:hover {
+			background-color: #666;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<div class="logo">HR Dashboard</div>
+			<div class="navigation">
+				<a href="#" class="active">My Opportunities</a>
+			</div>
+		</div>
+		<div class="content">
+			<h2>Welcome to your dashboard</h2>
+			<a href="/my-opportunities" class="button">My Opportunities</a>
+		</div>
+	</div>
+</body>
+</html>
