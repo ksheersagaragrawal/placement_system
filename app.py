@@ -1,6 +1,15 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
+# from flask.ext.jsonpify import jsonify
 from flask_mysqldb import MySQL
 import yaml
+from enum import Enum
+ 
+class Occupation(Enum):
+    STUDENT = 1
+    CDS_EMPLOYEE = 2
+    COMPANY_POC = 3
+
+USER = Occupation.STUDENT
 
 app = Flask(__name__)
 
@@ -27,119 +36,61 @@ def index():
         return redirect('/tables')
     return render_template('index.html')
 
+@app.route('/opportunities')
+def get_opportunities():
 
-@app.route('/viewallschema')
-def viewallschema():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("show schemas")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        return render_template('viewallschema.html',userDetails=userDetails)
+    student_id = request.args.get('student_id')
+    student_id = int(student_id)
+    status = request.args.get('status')
     
-@app.route('/tables')
-def tables():
-    cur = mysql.connection.cursor()
-    cur.execute("use project;")
-    resultValue = cur.execute("show tables")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('tables.html',userDetails=userDetails)
+    if(USER != Occupation.STUDENT):
+        return jsonify({"error": "Opportunity not found"}), 404
+    
+    if student_id is None and status is None:
+        cur = mysql.connection.cursor()
+        resultValue = cur.execute("select * from opportunity")
+        if resultValue > 0:
+            opportunities = cur.fetchall()
+            return jsonify(opportunities)
+    else:
+        cur = mysql.connection.cursor()
+        if status == 'applied':
+            query = "select * from selection_procedure where opp_id in (select opp_id from app_opp where student_id = %s)"
+            resultValue = cur.execute(query, (student_id,))
+            if resultValue>0:
+                opportunities = cur.fetchall()
+                return jsonify(opportunities)
+        elif status == 'rejected' or status == 'eligible' or status == 'not_eligible' or status == 'accepted':
+            query = "select * from opportunity where opp_id in (select opp_id from app_opp where student_id = %s)"
+            resultValue = cur.execute(query, (student_id,))
+            if resultValue>0:
+                opportunities = cur.fetchall()
+                return jsonify(opportunities)
+        else:
+            return jsonify({"error": "invalid status"}), 404
 
 @app.route('/opportunity')
-def viewtableopportunity():
+def get_opportunity_by_id():
+    if(USER != Occupation.STUDENT):
+        return jsonify({"error": "Opportunity not found"}), 404
+    opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from opportunity")
+    resultValue = cur.execute("select * from opportunity where opp_id = %s", (opp_id,))
     if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('opportunity.html',userDetails=userDetails)
+        opportunity_id = cur.fetchone()
+        return jsonify(opportunity_id)
     
-@app.route('/app_opp')
-def viewtableapp_opp():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from app_opp")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('app_opp.html',userDetails=userDetails)
-@app.route('/application')
-def viewtableapplication():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from application")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('application.html',userDetails=userDetails)
-@app.route('/company')
-def viewtablecompany():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from company")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('company.html',userDetails=userDetails)
-
-@app.route('/internship')
-def viewtableinternship():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from internship")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('internship.html',userDetails=userDetails)
-@app.route('/placement')
-def viewtableplacement():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from placement")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('placement.html',userDetails=userDetails)
-@app.route('/point_of_contact')
-def viewtablepointofcontact():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from point_of_contact")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('point_of_contact.html',userDetails=userDetails)
-@app.route('/requirements')
-def viewtablerequirements():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from requirements")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('requirements.html',userDetails=userDetails)
-
-@app.route('/selection_procedure')
-def viewtableselectionprocedure():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from selection_procedure")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('selection_procedure.html',userDetails=userDetails) 
-@app.route('/resume')
-def viewtableresume():
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute("select * from resume")
-    if resultValue > 0:
-        userDetails = cur.fetchall()
-        print(userDetails)
-        return render_template('resume.html',userDetails=userDetails)  
 @app.route('/student')
-def viewtablestudent():
-     cur = mysql.connection.cursor()
-     resultValue = cur.execute("SELECT * FROM student")
-     if resultValue > 0:
-         userDetails = cur.fetchall()
-         return render_template('student.html',userDetails=userDetails)     
-    
-    
-    
-    
+def get_student_by_id():
+    if(USER != Occupation.STUDENT):
+        return jsonify({"error": "Opportunity not found"}), 404
+    stud_id = request.args.get('student_id')
+    cur = mysql.connection.cursor()
+    resultValue = cur.execute("select * from student where student_id = %s", (stud_id,))
+    if resultValue > 0:
+        student_id = cur.fetchone()
+        return jsonify(student_id)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
