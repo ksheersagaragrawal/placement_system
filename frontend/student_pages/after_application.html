@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Job Application</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<style>
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		
+		.string {
+			margin-bottom: 20px;
+		}
+		
+		.resume select {
+			margin-right: 10px;
+		}
+		
+		.resume button {
+			margin-top: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Job Application</h1>
+		<div class="string">
+			<p id="string-value"></p>
+			<button id="correct-button">Is this correct?</button>
+		</div>
+		<div class="resume">
+			<label for="resume-select">Select your resume:</label>
+			<select id="resume-select" name="resume">
+				<option value="">--Select a resume--</option>
+			</select>
+			<button id="submit-button">Submit Application</button>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="script.js"></script>
+	<script>
+		$(document).ready(function() {
+			// 1. GET request to retrieve string value and display on page
+			$.get("/get_string", function(data) {
+				$("#string-value").text(data);
+			});
+		
+			// 2. Button to check if string is correct and redirect
+			$("#correct-button").click(function() {
+				if (confirm("Is this correct?")) {
+					window.location.href = "/page_b";
+				}
+			});
+		
+			// 3. GET request to retrieve resumes and populate dropdown
+			$.get("/get_resumes", function(data) {
+				const resumeSelect = $("#resume-select");
+				data.forEach(function(resume) {
+					resumeSelect.append($("<option></option>").attr("value", resume).text(resume));
+				});
+			});
+		
+			// 4. Submit application with selected resume
+			$("#submit-button").click(function() {
+				const selectedResume = $("#resume-select").val();
+				if (selectedResume) {
+					// Send selectedResume to backend to submit application
+					console.log(`Application submitted with resume: ${selectedResume}`);
+					alert("Application submitted!");
+				} else {
+					alert("Please select a resume.");
+				}
+			});
+		});
+	</script>
+</body>
+</html>
