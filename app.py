@@ -42,9 +42,9 @@ def get_opportunities():
     student_id = request.args.get('student_id')
     student_id = int(student_id)
     status = request.args.get('status')
-    
+
     if(USER != Occupation.STUDENT):
-        return jsonify({"error": "Opportunity not found"}), 404
+        return jsonify({"error": "Invalid Access"}), 404
     
     if student_id is None and status is None:
         cur = mysql.connection.cursor()
@@ -72,7 +72,7 @@ def get_opportunities():
 @app.route('/opportunity')
 def get_opportunity_by_id():
     if(USER != Occupation.STUDENT):
-        return jsonify({"error": "Opportunity not found"}), 404
+        return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
     resultValue = cur.execute("select * from opportunity where opp_id = %s", (opp_id,))
@@ -83,7 +83,7 @@ def get_opportunity_by_id():
 @app.route('/student')
 def get_student_by_id():
     if(USER != Occupation.STUDENT):
-        return jsonify({"error": "Opportunity not found"}), 404
+        return jsonify({"error": "Invalid Access"}), 404
     stud_id = request.args.get('student_id')
     cur = mysql.connection.cursor()
     resultValue = cur.execute("select * from student where student_id = %s", (stud_id,))
