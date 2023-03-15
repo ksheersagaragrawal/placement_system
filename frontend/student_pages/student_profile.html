@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Student Profile</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<style>
+		.container {
+			margin-top: 50px;
+			margin-bottom: 50px;
+		}
+
+		.profile-picture {
+			height: 200px;
+			width: 200px;
+			object-fit: cover;
+			border-radius: 50%;
+			margin-bottom: 20px;
+		}
+
+		h1 {
+			margin-bottom: 0;
+		}
+
+		.student-details {
+			font-size: 18px;
+			margin-bottom: 20px;
+		}
+
+		.student-details span {
+			font-weight: bold;
+		}
+
+		.student-details .label {
+			margin-right: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4 offset-md-4">
+				<div class="text-center">
+					<img class="profile-picture" src="" alt="Profile Picture">
+					<h1 id="student-name"></h1>
+					<div class="student-details">
+						<span class="label">Department:</span><span id="student-dept"></span>
+					</div>
+					<div class="student-details">
+						<span class="label">CPI:</span><span id="student-cpi"></span>
+					</div>
+					<div class="student-details">
+						<span class="label">Active Backlogs:</span><span id="student-backlogs"></span>
+					</div>
+					<div class="student-details">
+						<span class="label">Gender:</span><span id="student-gender"></span>
+					</div>
+					<div class="student-details">
+						<span class="label">Study Year:</span><span id="student-study-year"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			// Make GET request to server to retrieve student profile data
+			$.get('/api/student', function(data) {
+				// Populate the HTML elements with the retrieved data
+				$('#student-name').text(data.student_first_name + ' ' + data.student_middle_name + ' ' + data.student_last_name);
+				$('#student-dept').text(data.dept);
+				$('#student-cpi').text(data.CPI);
+				$('#student-backlogs').text(data.active_backlogs);
+				$('#student-gender').text(data.gender);
+				$('#student-study-year').text(data.study_year);
+
+				// Set the profile picture
+				if (data.student_image) {
+					$('.profile-picture').attr('src', 'data:image/png;base64,' + data.student_image);
+				} else {
+					$('.profile-picture').attr('src', 'default-profile-picture.png');
+				}
+			});
+		});
+	</script>
+</body>
+</html>
+
