@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Student Dashboard</title>
+    <style>
+      /* Set background color and font family */
+      body {
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Style the header */
+      header {
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+      }
+      
+      /* Style the main content */
+      main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      
+      /* Style the dashboard options */
+      .dashboard-options {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      
+      .dashboard-option {
+        width: calc(33.33% - 10px);
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      
+      .dashboard-option:hover {
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+      }
+      
+      .dashboard-option a {
+        display: block;
+        padding: 20px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s;
+      }
+      
+      .dashboard-option a:hover {
+        background-color: #f4f4f4;
+      }
+      
+      /* Style the footer */
+      footer {
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Student Dashboard</h1>
+    </header>
+    <main>
+      <div class="dashboard-options">
+        <div class="dashboard-option">
+          <a href="/profiles">Profile</a>
+        </div>
+        <div class="dashboard-option">
+          <a href="/resumes">Resumes</a>
+        </div>
+        <div class="dashboard-option">
+          <a href="/opportunity">Opportunities</a>
+        </div>
+      </div>
+      <p>Welcome student! Please choose one of the options above.</p>
+    </main>
+    <footer>
+      <p>Copyright &copy; 2023</p>
+    </footer>
+  </body>
+</html>
