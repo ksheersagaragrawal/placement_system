@@ -54,7 +54,7 @@
 				}
 			});
 		
-			// 3. GET request to retrieve resumes and populate dropdown
+			// 3. GET request to retrieve resumes and populate dropdown 
 			$.get("/get_resumes", function(data) {
 				const resumeSelect = $("#resume-select");
 				data.forEach(function(resume) {
