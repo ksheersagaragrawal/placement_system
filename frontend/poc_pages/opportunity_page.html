@@ -107,15 +107,13 @@
           // Open modal and get opportunity details and students when an opportunity card is clicked
           $(document).on("click", ".opportunity-card", function() {
             var opp_id = $(this).data("opp-id");
-            $.get("http://localhost:5500/api/poc/opportunities?opp_id=" + opp_id, function(data, status) {
-              var opportunity = data.opportunity;
-              $("#opportunity-details").html("<h4>" + opportunity.opp_title + "</h4><p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>");
-              var students = data.students;
+            $.get("http://localhost:5500/api/poc/opportunities/student?opp_id=" + opp_id, function(data, status) {
+              var students = data;
               $("#students").html("");
               for (var i = 0; i < students.length; i++) {
                 var student = students[i];
                 var student_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + student.student_id + "'></td>";
-                student_row += "<td>" + student.student_name + "</td>";
+                student_row += "<td>" + student.student_first_name + " " + student.student_second_name + " " + student.student_last_name + "</td>";
                 student_row += "<td>" + student.round_number + "</td></tr>";
                 $("#students").append(student_row);
               }
