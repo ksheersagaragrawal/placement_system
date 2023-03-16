@@ -88,95 +88,40 @@
 
     <script>
       $(document).ready(function() {
-        // Get opportunities for this HR from API
-        var poc_email_id = "xyz"; // Replace with actual poc_email_id
-      $.get("/api/poc/opportunities?poc_email_id=" + poc_email_id, function(data, status) {
-        var opportunities = data.opportunities;
-        for (var i = 0; i < opportunities.length; i++) {
-          var opportunity = opportunities[i];
-          var opportunity_card = "<div class='opportunity-card' data-opp-id='" + opportunity.opp_id + "'>";
-          opportunity_card += "<h4>" + opportunity.opp_title + "</h4>";
-          opportunity_card += "<p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>";
-          opportunity_card += "<p>" + opportunity.opp_type + "</p>";
-          opportunity_card += "</div>";
-          $("#opportunities").append(opportunity_card);
-        }
-      });
-  
-      // Open modal and get opportunity details and students when an opportunity card is clicked
-      $(document).on("click", ".opportunity-card", function() {
-        var opp_id = $(this).data("opp-id");
-        $.get("/api/poc/opportunity?opp_id=" + opp_id, function(data, status) {
-          var opportunity = data.opportunity;
-          $("#opportunity-details").html("<h4>" + opportunity.opp_title + "</h4><p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>");
-          var students = data.students;
-          $("#students").html("");
-          for (var i = 0; i < students.length; i++) {
-            var student = students[i];
-            var student_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + student.student_id + "'></td>";
-            student_row += "<td>" + student.student_name + "</td>";
-            student_row += "<td>" + student.round_number + "</td></tr>";
-            $("#students").append(student_row);
-          }
-        });
-        $("#opportunity-modal").modal("show");
-      });
-  
-      // Handle Accepted button click
-      $(document).on("click", "#accepted-btn", function() {
-        var opp_id = $("#opportunity-details").find("h4").text(); // Assuming opportunity title is the header
-        var round_number = $("#round-number").val();
-        var selected_students = [];
-        $("#students").find("input:checked").each(function() {
-          selected_students.push($(this).data("student-id"));
-        });
-        if (selected_students.length > 0) {
-          var data = {
-            "opp_id": opp_id,
-            "round_number": round_number,
-            "student_ids": selected_students.join(","),
-            "status": "accepted"
-          };
-          $.post("/api/poc/opportunity", data, function(response) {
-            if (response.success) {
-              $("#opportunity-modal").modal("hide");
-              alert("Accepted students: " + selected_students.join(", "));
-            } else {
-              alert("Error: " + response.message);
+          // Get opportunities for this HR from API
+          var poc_email_id = "1"; // Replace with actual poc_email_id
+          $.get("http://localhost:5500/api/poc/opportunities?poc_email_id=" + poc_email_id, function(data, status) {
+            var opportunities = data;
+            const length = opportunities.length;
+            for (var i = 0; i < length; i++) {
+              var opportunity = opportunities[i];
+              var opportunity_card = "<div class='opportunity-card' data-opp-id='" + opportunity.opp_id + "'>";
+              opportunity_card += "<h4>" + opportunity.opp_title + "</h4>";
+              opportunity_card += "<p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>";
+              opportunity_card += "<p>" + opportunity.opp_type + "</p>";
+              opportunity_card += "</div>";
+              $("#opportunities").append(opportunity_card);
             }
           });
-        } else {
-          alert("Please select at least one student.");
-        }
-      });
-  
-      // Handle Proceed to Next Round button click
-      $(document).on("click", "#next-round-btn", function() {
-        var opp_id = $("#opportunity-details").find("h4").text(); // Assuming opportunity title is the header
-        var round_number = $("#round-number").val();
-        var selected_students = [];
-        $("#students").find("input:checked").each(function() {
-          selected_students.push($(this).data("student-id"));
-        });
-        if (selected_students.length > 0) {
-        var data = {
-          "opp_id": opp_id,
-          "round_number": round_number,
-          "student_ids": selected_students.join(","),
-          "status": "proceed"
-        };
-        $.post("/api/poc/opportunity", data, function(response) {
-          if (response.success) {
-            $("#opportunity-modal").modal("hide");
-            alert("Proceeded students: " + selected_students.join(", "));
-          } else {
-            alert("Error: " + response.message);
-          }
-        });
-        } else {
-          alert("Please select at least one student.");
-        }
-        });
+      
+          // Open modal and get opportunity details and students when an opportunity card is clicked
+          $(document).on("click", ".opportunity-card", function() {
+            var opp_id = $(this).data("opp-id");
+            $.get("http://localhost:5500/api/poc/opportunities?opp_id=" + opp_id, function(data, status) {
+              var opportunity = data.opportunity;
+              $("#opportunity-details").html("<h4>" + opportunity.opp_title + "</h4><p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>");
+              var students = data.students;
+              $("#students").html("");
+              for (var i = 0; i < students.length; i++) {
+                var student = students[i];
+                var student_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + student.student_id + "'></td>";
+                student_row += "<td>" + student.student_name + "</td>";
+                student_row += "<td>" + student.round_number + "</td></tr>";
+                $("#students").append(student_row);
+              }
+            });
+            $("#opportunity-modal").modal("show");
+          });
       });
     </script>
   </body>
