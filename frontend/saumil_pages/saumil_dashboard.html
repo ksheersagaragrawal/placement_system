@@ -83,10 +83,53 @@
 
 		// Function to handle view opportunities button click
 		function viewOpportunities() {
-			fetch(OPPORTUNITIES_URL)
-				.then(response => response.json())
-				.then(data => console.log(data))
-				.catch(error => console.error(error));
+            $('#view-opportunity-table').show();
+
+            fetch('api/opportunities')
+            .then((response) => response.json())
+            .then((data) => {
+            // Populate the table rows dynamically with the JSON data
+            const opportunitiesList = document.getElementById('opportunities-list');
+            data.forEach((opportunity) => {
+                const row = `
+                <tr>
+                    <td>${opportunity.opportunityID}</td>
+                    <td>${opportunity.opportunityName}</td>
+                    <td><button onclick="showMore('${opportunity.opportunityID}')">Show More</button></td>
+                </tr>
+                `;
+                opportunitiesList.insertAdjacentHTML('beforeend', row);
+            });
+            })
+            .catch((error) => console.error(error));
+		}
+
+		function showMore(opp_id) {
+			$.get("http://localhost:5500/api/opportunity/?opp_id=" + opp_id, function(data, status) {
+			  var opportunity = data[0];
+			  var card = '<div class="card">' +
+						   '<div class="card-header">' +
+							 '<h5 class="card-title">' + opportunity.opp_title + '</h5>' +
+						   '</div>' +
+						   '<div class="card-body">' +
+							 '<p class="card-text">Opportunity Type: ' + opportunity.opp_type + '</p>' +
+							 '<p class="card-text">Address Line 1: ' + opportunity.address_line_1 + '</p>' +
+							 '<p class="card-text">Address Line 2: ' + opportunity.address_line_2 + '</p>' +
+							 '<p class="card-text">Address Line 3: ' + opportunity.address_line_3 + '</p>' +
+							 '<p class="card-text">Minimum CPI Requirement: ' + opportunity.min_cpi_req + '</p>' +
+							 '<p class="card-text">Active Backlog: ' + opportunity.active_backlog + '</p>' +
+							 '<p class="card-text">Program Requirement: ' + opportunity.program_req + '</p>' +
+							 '<p class="card-text">Department Requirement: ' + opportunity.dept_req + '</p>' +
+							 '<p class="card-text">Year Requirement: ' + opportunity.year_req + '</p>' +
+							 '<p class="card-text">Salary: ' + opportunity.salary + '</p>' +
+							 '<p class="card-text">Opportunity Requirement: ' + opportunity.opp_req + '</p>' +
+							 '<p class="card-text">Posted On: ' + opportunity.posted_on + '</p>' +
+							 '<p class="card-text">Deadline: ' + opportunity.deadline + '</p>' +
+						   '</div>' +
+						 '</div>';
+			  $("#opportunity-modal .modal-body").html(card);
+			  $("#opportunity-modal").modal("show");
+			});		  
 		}
 
 		// Function to handle add opportunities button click

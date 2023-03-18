@@ -43,7 +43,7 @@
 	<script>
 		$(document).ready(function() {
 			// 1. GET request to retrieve string value and display on page
-			$.get("/get_string", function(data) {
+			$.get("/api/recent/get_application_data_as_string", function(data) {
 				$("#string-value").text(data);
 			});
 		
@@ -55,7 +55,7 @@
 			});
 		
 			// 3. GET request to retrieve resumes and populate dropdown 
-			$.get("/get_resumes", function(data) {
+			$.get("/api/student/resume", function(data) {
 				const resumeSelect = $("#resume-select");
 				data.forEach(function(resume) {
 					resumeSelect.append($("<option></option>").attr("value", resume).text(resume));
