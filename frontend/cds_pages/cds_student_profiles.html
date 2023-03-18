@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Student Details</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <style>
+    .card {
+      margin: 20px;
+    }
+    .modal-dialog {
+      margin: 20px auto;
+      width: 80%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <h1>Student Details</h1>
+  <div class="row" id="student-list"></div>
+</div>
+
+<!-- Modal for editing student details -->
+<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modal-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="edit-modal-label">Edit Student Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-form">
+          <input type="hidden" id="edit-id">
+          <div class="form-group">
+            <label for="edit-first-name">First Name:</label>
+            <input type="text" class="form-control" id="edit-first-name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-middle-name">Middle Name:</label>
+            <input type="text" class="form-control" id="edit-middle-name">
+          </div>
+          <div class="form-group">
+            <label for="edit-last-name">Last Name:</label>
+            <input type="text" class="form-control" id="edit-last-name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-image">Image:</label>
+            <input type="file" class="form-control-file" id="edit-image">
+          </div>
+          <div class="form-group">
+            <label for="edit-dept">Department:</label>
+            <select class="form-control" id="edit-dept" required>
+              <option value="CSE">CSE</option>
+              <option value="EE">EE</option>
+              <option value="ME">ME</option>
+              <option value="CE">CE</option>
+              <option value="CVE">CVE</option>
+              <option value="MSE">MSE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-cpi">CPI:</label>
+            <input type="number" class="form-control" id="edit-cpi" min="0" max="10" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-active-backlogs">Active Backlogs:</label>
+            <select class="form-control" id="edit-active-backlogs" required>
+<option value="yes">Yes</option>
+<option value="no">No</option>
+</select>
+</div>
+<div class="form-group">
+<label for="edit-gender">Gender:</label>
+<select class="form-control" id="edit-gender" required>
+<option value="male">Male</option>
+<option value="female">Female</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label for="edit-study-year">Study Year:</label>
+<input type="number" class="form-control" id="edit-study-year" min="1" max="5" required>
+</div>
+</form>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+<button type="button" class="btn btn-primary" id="save-changes-btn">Save Changes</button>
+</div>
+</div>
+
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+    // Get the list of students from the API
+    $.get("http://localhost:5500/api/cds/student", function(data) {
+      // Iterate through each student and create a card
+      for (var i = 0; i < data.length; i++) {
+        var student = data[i];
+        var cardHtml = '<div class="col-sm-4">' +
+          '<div class="card">' +
+          '<div class="card-body">' +
+          '<h5 class="card-title">' + student.student_first_name + ' ' + student.student_last_name + '</h5>' +
+          '<p class="card-text"><strong>Department:</strong> ' + student.dept + '</p>' +
+          '<p class="card-text"><strong>CPI:</strong> ' + student.CPI + '</p>' +
+          '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#edit-modal" data-student=\'' + JSON.stringify(student) + '\'>Edit</button>' +
+          '</div>' +
+          '</div>' +
+          '</div>';
+        $('#student-list').append(cardHtml);
+      }
+
+      // Set up the event handler for when the edit modal is opened
+      $('#edit-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+          for(var i = 0; i < data.length; i++){
+              var student = data[i];
+            $('#edit-id').val(student.student_id);
+            $('#edit-first-name').val(student.student_first_name);
+            $('#edit-middle-name').val(student.student_middle_name);
+            $('#edit-last-name').val(student.student_last_name);
+            $('#edit-image').val(null); // Clear the file input field
+            $('#edit-dept').val(student.dept);
+            $('#edit-cpi').val(student.CPI);
+            $('#edit-active-backlogs').val(student.active_backlogs);
+            $('#edit-gender').val(student.gender);
+            $('#edit-study-year').val(student.study_year);
+          }
+      });
+
+      // Set up the event handler for when the save changes button is clicked
+      $('#save-changes-btn').click(function() {
+        var student = {
+          student_id: $('#edit-id').val(),
+          student_first_name: $('#edit-first-name').val(),
+          student_middle_name: $('#edit-middle-name').val(),
+          student_last_name: $('#edit-last-name').val(),
+          dept: $('#edit-dept').val(),
+          CPI: parseFloat($('#edit-cpi').val()),
+          active_backlogs: $('#edit-active-backlogs').val(),
+          gender: $('#edit-gender').val(),
+          study_year: parseInt($('#edit-study-year').val())
+        };
+
+        // Make a POST request to the API to update the student
+        $.ajax({
+          url: "http://localhost:5500/api/cds/student",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(student),
+          success: function(result) {
+            // Reload the page to show the updated data
+            location.reload();
+          },
+          error: function(xhr, textStatus, errorThrown) {
+            alert("Error updating student: " + xhr.responseText);
+          }
+        });
+      });
+});
+});
+</script>
+
+</body>
+</html>

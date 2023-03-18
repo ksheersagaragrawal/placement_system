@@ -25,7 +25,11 @@ app.get('/poc', (req, res) => {
 
 app.get('/poc/my-opportunities', (req, res) => {
     res.sendFile(path.join(__dirname, './frontend/poc_pages/opportunity_page.html'));
-}); 
+});  
+
+app.get('/cds/student', (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/cds_pages/cds_student_profiles.html'));
+})
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

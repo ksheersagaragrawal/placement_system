@@ -254,6 +254,7 @@
         const oppId = document.getElementById("opp_id").value;
         const oppType = document.getElementById("opp_type").value;
 
+<<<<<<< HEAD:frontend/saumil_pages/saumil_dashboard.html
         const requestOptions = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -268,3 +269,11 @@
     </script>
   </body>
 </html> -->
+=======
+		fetch(CDS_OPPORTUNITY_URL, requestOptions)
+			.then(response => response.json())
+			.then(data => console.log(data))
+			.catch(error => console.error(error));
+	}
+</script>
+>>>>>>> 22619973aba1757738922b41aa7466379333a422:frontend/cds_pages/saumil_dashboard.html
