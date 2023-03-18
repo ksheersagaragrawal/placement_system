@@ -95,25 +95,10 @@
 
 		// Function to handle view opportunities button click
 		function viewOpportunities() {
-            $('#view-opportunity-table').show();
-
-            fetch('api/opportunities')
-            .then((response) => response.json())
-            .then((data) => {
-            // Populate the table rows dynamically with the JSON data
-            const opportunitiesList = document.getElementById('opportunities-list');
-            data.forEach((opportunity) => {
-                const row = `
-                <tr>
-                    <td>${opportunity.opportunityID}</td>
-                    <td>${opportunity.opportunityName}</td>
-                    <td><button onclick="showMore('${opportunity.opportunityID}')">Show More</button></td>
-                </tr>
-                `;
-                opportunitiesList.insertAdjacentHTML('beforeend', row);
-            });
-            })
-            .catch((error) => console.error(error));
+			fetch(OPPORTUNITIES_URL)
+				.then(response => response.json())
+				.then(data => console.log(data))
+				.catch(error => console.error(error));
 		}
 
 
