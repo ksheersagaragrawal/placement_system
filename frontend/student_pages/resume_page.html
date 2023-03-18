@@ -1,52 +1,74 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Resume Page</title>
-  </head>
-  <body>
-    <h1>Resume Page</h1>
-    <h2>Choose a New File</h2>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <label for="file">Select a file:</label>
-      <input type="file" id="file" name="resume">
-      <br><br>
-      <input type="submit" value="Upload">
-    </form>
-    
-    <script>
-      function deleteResume(resumeId) {
-        // Code to delete the resume with the given ID goes here
-        alert(`Resume with ID ${resumeId} has been deleted.`);
-      }
+<head>
+	<title>Student Resumes</title>
+	<!-- Add Bootstrap CSS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+	<div class="container">
+		<h1>Student Resumes</h1>
+		<form id="add-resume-form">
+			<div class="form-group">
+				<label for="resume_file_name">Resume Name:</label>
+				<input type="text" class="form-control" id="resume_file_name" placeholder="Enter resume name">
+			</div>
+			<div class="form-group">
+				<label for="resume_file_link">Resume Link:</label>
+				<input type="text" class="form-control" id="resume_file_link" placeholder="Enter resume link">
+			</div>
+			<button type="submit" class="btn btn-primary">Add Resume</button>
+		</form>
+		<hr>
+		<h2>Existing Resumes:</h2>
+		<ul id="resume-list"></ul>
+	</div>
+
+	<!-- Add jQuery and Bootstrap JS -->
+
+	<script>
+		// Submit form data to API endpoint on form submit
+		$('#add-resume-form').submit(function(event) {
+			event.preventDefault();
+			var resumeName = $('#resume_file_name').val();
+			var resumeLink = $('#resume_file_link').val();
+			var data = {'resume_file_name': resumeName, 'resume_file_link': resumeLink};
+			$.post('api/student/resume', JSON.stringify(data))
+			.done(function(response) {
+				// Reload list of resumes
+				getResumes();
+				// Reset form inputs
+				$('#resume_file_name').val('');
+				$('#resume_file_link').val('');
+			})
+			.fail(function(error) {
+				console.error(error);
+			});
+		});
+
+		// Get list of existing resumes from API endpoint on page load
+		$(document).ready(function() {
+			getResumes();
+		});
+
+		function getResumes() {
+			$.get('api/student/resume')
+			.done(function(response) {
+                // Clear existing list
+                $('#resume-list').empty();
+                // Add each resume to the list
+                response.forEach(function(resume) {
+                    var listItem = '<li><strong>' + resume.resume_name + '</strong> (ID: ' + resume.resume_id + ') - <a href="' + resume.resume_link + '">Link</a></li>';
+                    $('#resume-list').append(listItem);
+                });
+            })
+            .fail(function(error) {
+                console.error(error);
+            });
+        }
     </script>
-      
-    <h2>Choose from Previously Stored Resumes</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Resume ID</th>
-          <th>Resume File</th>
-          <th>Resume Name</th>
-          <th>Date</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td><a href="/resumes/resume1.pdf">resume1.pdf</a></td>
-          <td>John Doe</td>
-          <td>2022-02-28</td>
-          <td><button onclick="deleteResume(1)">Delete</button></td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td><a href="/resumes/resume2.pdf">resume2.pdf</a></td>
-          <td>Jane Smith</td>
-          <td>2022-03-05</td>
-          <td><button onclick="deleteResume(2)">Delete</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </body>
+</body>
 </html>

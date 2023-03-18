@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CDS Dashboard</title>
+	<style>
+		body {
+			background-color: #f2f2f2;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+		.container {
+			margin: 0 auto;
+			max-width: 800px;
+			padding: 20px;
+			background-color: #fff;
+			box-shadow: 0 0 10px #999;
+			border-radius: 10px;
+			text-align: center;
+		}
+		button {
+			background-color: #4CAF50;
+			color: white;
+			padding: 12px 20px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			margin-right: 10px;
+			font-size: 16px;
+		}
+		button:hover {
+			background-color: #3e8e41;
+		}
+		input[type=text] {
+			width: 100%;
+			padding: 12px 20px;
+			margin: 8px 0;
+			box-sizing: border-box;
+			border: 2px solid #ccc;
+			border-radius: 4px;
+			font-size: 16px;
+		}
+		input[type=submit] {
+			background-color: #4CAF50;
+			color: white;
+			padding: 12px 20px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 16px;
+		}
+		input[type=submit]:hover {
+			background-color: #3e8e41;
+		}
+	</style>
+</head>
+<body>
+		<!-- Opportunity Modal -->
+		<div class="modal fade" id="opportunity-modal" tabindex="-1" role="dialog" aria-labelledby="opportunity-modal-label" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="opportunity-modal-label">Opportunity Details</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<div class="modal-body">
+				  <!-- The opportunity card will be inserted here -->
+				</div>
+				<div class="modal-footer">
+				  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+
+  
+	<div class="container">
+		<h1>CDS Dashboard</h1>
+		<button id="view-btn">View Opportunities</button>
+		<button id="add-btn">Add Opportunities</button>
+		<button id="dlt-btn">Delete Opportunities</button>
+
+		<form id="add-form" style="display:none;">
+			<label for="opp_id">Opportunity ID:</label>
+			<input type="text" id="opp_id" name="opp_id"><br>
+			<label for="opp_type">Opportunity Type:</label>
+			<input type="text" id="opp_type" name="opp_type"><br>
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+	<script>
+		// Define API endpoints
+		const API_URL = 'http://example.com/api';
+		const OPPORTUNITIES_URL = `${API_URL}/opportunities`;
+		const CDS_OPPORTUNITY_URL = `${API_URL}/cds/opportunity`;
+
+		// Get button elements
+		const viewBtn = document.getElementById('view-btn');
+		const addBtn = document.getElementById('add-btn');
+
+		// Add event listeners to buttons
+		viewBtn.addEventListener('click', viewOpportunities);
+		addBtn.addEventListener('click', showAddForm);
+
+		// Function to handle view opportunities button click
+		function viewOpportunities() {
+            $('#view-opportunity-table').show();
+
+            fetch('api/opportunities')
+            .then((response) => response.json())
+            .then((data) => {
+            // Populate the table rows dynamically with the JSON data
+            const opportunitiesList = document.getElementById('opportunities-list');
+            data.forEach((opportunity) => {
+                const row = `
+                <tr>
+                    <td>${opportunity.opportunityID}</td>
+                    <td>${opportunity.opportunityName}</td>
+                    <td><button onclick="showMore('${opportunity.opportunityID}')">Show More</button></td>
+                </tr>
+                `;
+                opportunitiesList.insertAdjacentHTML('beforeend', row);
+            });
+            })
+            .catch((error) => console.error(error));
+		}
+
+		function showMore(opp_id) {
+			$.get("http://localhost:5500/api/opportunity/?opp_id=" + opp_id, function(data, status) {
+			  var opportunity = data[0];
+			  var card = '<div class="card">' +
+						   '<div class="card-header">' +
+							 '<h5 class="card-title">' + opportunity.opp_title + '</h5>' +
+						   '</div>' +
+						   '<div class="card-body">' +
+							 '<p class="card-text">Opportunity Type: ' + opportunity.opp_type + '</p>' +
+							 '<p class="card-text">Address Line 1: ' + opportunity.address_line_1 + '</p>' +
+							 '<p class="card-text">Address Line 2: ' + opportunity.address_line_2 + '</p>' +
+							 '<p class="card-text">Address Line 3: ' + opportunity.address_line_3 + '</p>' +
+							 '<p class="card-text">Minimum CPI Requirement: ' + opportunity.min_cpi_req + '</p>' +
+							 '<p class="card-text">Active Backlog: ' + opportunity.active_backlog + '</p>' +
+							 '<p class="card-text">Program Requirement: ' + opportunity.program_req + '</p>' +
+							 '<p class="card-text">Department Requirement: ' + opportunity.dept_req + '</p>' +
+							 '<p class="card-text">Year Requirement: ' + opportunity.year_req + '</p>' +
+							 '<p class="card-text">Salary: ' + opportunity.salary + '</p>' +
+							 '<p class="card-text">Opportunity Requirement: ' + opportunity.opp_req + '</p>' +
+							 '<p class="card-text">Posted On: ' + opportunity.posted_on + '</p>' +
+							 '<p class="card-text">Deadline: ' + opportunity.deadline + '</p>' +
+						   '</div>' +
+						 '</div>';
+			  $("#opportunity-modal .modal-body").html(card);
+			  $("#opportunity-modal").modal("show");
+			});		  
+		}
+
+		// Function to handle add opportunities button click
+		function showAddForm() {
+			// Hide view opportunities button
+			viewBtn.style.display = 'none';
+
+			// Show add opportunities form
+			addForm.style.display = 'block';
+
+			// Add event listener to add form submit
+			addForm.addEventListener
+                         ('submit', addOpportunity);
+}
+	// Function to handle add form submit
+	function addOpportunity(event) {
+		event.preventDefault();
+
+		const oppId = document.getElementById('opp_id').value;
+		const oppType = document.getElementById('opp_type').value;
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ opp_id: oppId, opp_type: oppType })
+		};
+
+		fetch(CDS_OPPORTUNITY_URL, requestOptions)
+			.then(response => response.json())
+			.then(data => console.log(data))
+			.catch(error => console.error(error));
+	}
+</script>
