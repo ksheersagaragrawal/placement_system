@@ -10,12 +10,12 @@
 		<h1>Student Resumes</h1>
 		<form id="add-resume-form">
 			<div class="form-group">
-				<label for="resume-name">Resume Name:</label>
-				<input type="text" class="form-control" id="resume-name" placeholder="Enter resume name">
+				<label for="resume_file_name">Resume Name:</label>
+				<input type="text" class="form-control" id="resume_file_name" placeholder="Enter resume name">
 			</div>
 			<div class="form-group">
-				<label for="resume-link">Resume Link:</label>
-				<input type="text" class="form-control" id="resume-link" placeholder="Enter resume link">
+				<label for="resume_file_link">Resume Link:</label>
+				<input type="text" class="form-control" id="resume_file_link" placeholder="Enter resume link">
 			</div>
 			<button type="submit" class="btn btn-primary">Add Resume</button>
 		</form>
@@ -32,16 +32,16 @@
 		// Submit form data to API endpoint on form submit
 		$('#add-resume-form').submit(function(event) {
 			event.preventDefault();
-			var resumeName = $('#resume-name').val();
-			var resumeLink = $('#resume-link').val();
-			var data = {'resume_name': resumeName, 'resume_link': resumeLink};
+			var resumeName = $('#resume_file_name').val();
+			var resumeLink = $('#resume_file_link').val();
+			var data = {'resume_file_name': resumeName, 'resume_file_link': resumeLink};
 			$.post('api/student/resume', JSON.stringify(data))
 			.done(function(response) {
 				// Reload list of resumes
 				getResumes();
 				// Reset form inputs
-				$('#resume-name').val('');
-				$('#resume-link').val('');
+				$('#resume_file_name').val('');
+				$('#resume_file_link').val('');
 			})
 			.fail(function(error) {
 				console.error(error);
