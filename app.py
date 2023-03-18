@@ -141,6 +141,30 @@ def add_new_opportunity():
     cur.close()
     return jsonify({"message": "Opportunity added successfully"}), 200
 
+@app.route('/api/cds/requirements', methods=['POST'])
+def add_requirements():
+    if USER != Occupation.CDS_EMPLOYEE:
+        return jsonify({"error": "Invalid Access"}), 404
+    requirements = request.get_json()
+    # Columns in requirements table
+    # Requirements: opp_id, min_cpi_req, active_backlog, program_req, dept_req, year_req, salary, opp_status, opp_req, posted_on, deadline
+    opp_id = requirements['opp_id']
+    min_cpi_req = requirements['min_cpi_req']
+    active_backlog = requirements['active_backlog']
+    program_req = requirements['program_req']
+    dept_req = requirements['dept_req']
+    year_req = requirements['year_req']
+    salary = requirements['salary']
+    opp_status = requirements['opp_status']
+    opp_req = requirements['opp_req']
+    posted_on = requirements['posted_on']
+    deadline = requirements['deadline']
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO requirements(opp_id, min_cpi_req, active_backlog, program_req, dept_req, year_req, salary, opp_status, opp_req, posted_on, deadline) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (opp_id, min_cpi_req, active_backlog, program_req, dept_req, year_req, salary, opp_status, opp_req, posted_on, deadline))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Requirements added successfully"}), 200
 
 @app.route('/api/cds/opportunity_delete', methods=['POST'])
 def delete_opportunity():
