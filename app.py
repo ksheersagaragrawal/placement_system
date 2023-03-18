@@ -1,3 +1,5 @@
+# pylint: disable=all
+
 from flask import Flask, render_template, request, redirect, jsonify
 # from flask.ext.jsonpify import jsonify
 from flask_mysqldb import MySQL
@@ -10,7 +12,7 @@ class Occupation(Enum):
     CDS_EMPLOYEE = 2
     COMPANY_POC = 3
 
-USER = Occupation.STUDENT
+USER = Occupation.COMPANY_POC
 
 app = Flask(__name__)
 
@@ -36,6 +38,7 @@ def index():
         cur.close()
         return redirect('/tables')
     return render_template('index.html')
+
 
 ##### for student get requests#####
 @app.route('/opportunities')
@@ -110,10 +113,12 @@ def get_opportunities():
                 return jsonify(final_opportunities)
         else:
             return jsonify({"error": "invalid status"}), 404
+    return jsonify("No matches were found for your search criteria")
+
 
 @app.route('/opportunity')
 def get_opportunity_by_id():
-    if(USER != Occupation.STUDENT):
+    if(USER != Occupation.STUDENT and USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
@@ -124,7 +129,8 @@ def get_opportunity_by_id():
         dict = {}
         for i in range(len(cur.description)):
             dict[field_names[i]] = opportunity_desc[i]
-        return jsonify(dict) 
+        return jsonify(dict)
+    return jsonify("No matches were found for your search criteria")
     
 @app.route('/student')
 def get_student_by_id():
@@ -140,6 +146,80 @@ def get_student_by_id():
         for i in range(len(cur.description)):
             dict[field_names[i]] = student_desc[i]
         return jsonify(dict) 
+    return jsonify("No matches were found for your search criteria")
+
+@app.route('/poc/opportunity')
+def get_opportunity_by_id_for_poc():
+    if (USER != Occupation.COMPANY_POC):
+        return jsonify({"error": "Invalid Access"}), 404
+    poc_email_id = request.args.get('poc_email_id')
+    cur = mysql.connection.cursor()
+    query = "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id WHERE opportunity.opp_id in (select opp_id from point_of_contact where poc_email_id = %s);"
+    resultValue = cur.execute(query,(poc_email_id,))
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        opportunities = cur.fetchall()
+        final_opportunities = []
+        for j in range(len(opportunities)):
+            dict = {}
+            for i in range(len(cur.description)):
+                if field_names[i] == "min_cpi_req":
+                    dict[field_names[i]] = float(opportunities[j][i])
+                else: dict[field_names[i]] = opportunities[j][i]
+            final_opportunities.append(dict)
+            
+        # return the list of dictionaries as json response
+        return jsonify(final_opportunities)
+    return jsonify("No matches were found for your search criteria")
+
+
+@app.route('/poc/opportunity/student')
+def get_opportunity_by_id_and_round_no_for_poc():
+    if (USER != Occupation.COMPANY_POC):
+        return jsonify({"error": "Invalid Access"}), 404
+    opp_id = request.args.get('opp_id')
+    round_number = request.args.get('round_number')
+    cur = mysql.connection.cursor()
+    query = "SELECT * FROM student WHERE student.student_id in (SELECT s.student_id FROM student s JOIN application a ON s.student_id = a.student_id JOIN app_opp ao ON a.student_id = ao.student_id AND a.opp_id = ao.opp_id AND a.resume_id = ao.resume_id JOIN selection_procedure sp ON ao.OPP__ID = sp.opp_id WHERE sp.opp_id = %s AND sp.round_number >= %s);"
+    resultValue = cur.execute(query,(opp_id,round_number))
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        students = cur.fetchall()
+        final_students = []
+        for j in range(len(students)):
+            dict = {}
+            for i in range(len(cur.description)):
+                if field_names[i] == 'CPI': dict[field_names[i]] = float(students[j][i])
+                else: dict[field_names[i]] = students[j][i]
+            final_students.append(dict)
+            
+        # return the list of dictionaries as json response
+        return jsonify(final_students)
+    return jsonify("No matches were found for your search criteria")
+
+
+@app.route('/opportunity/selected')
+def get_student_details_by_opportunity_id():
+    if (USER != Occupation.COMPANY_POC and USER != Occupation.CDS_EMPLOYEE):
+        return jsonify({"error": "Invalid Access"}), 404
+    opp_id = request.args.get('opp_id')
+    cur = mysql.connection.cursor()
+    query = "SELECT * FROM student WHERE student.student_id in (SELECT application.student_id FROM application WHERE application.opp_id = %s);"
+    resultValue = cur.execute(query,(opp_id,))
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        students = cur.fetchall()
+        final_students = []
+        for j in range(len(students)):
+            dict = {}
+            for i in range(len(cur.description)):
+                if field_names[i] == 'CPI': dict[field_names[i]] = float(students[j][i])
+                else: dict[field_names[i]] = students[j][i]
+            final_students.append(dict)
+        # return the list of dictionaries as json response
+        return jsonify(final_students)
+    return jsonify("No matches were found for your search criteria")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
