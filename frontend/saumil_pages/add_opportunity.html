@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Opportunity Form</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<!-- Bootstrap JS -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<!-- Custom CSS -->
+	<style>
+		body {
+			background-color: #f8f9fa;
+			margin: 0;
+			padding: 0;
+		}
+		h1 {
+			margin-top: 50px;
+			text-align: center;
+		}
+		form {
+			margin-top: 50px;
+            align-items: center;
+		}
+	</style>
+</head>
+<body>
+	<h1>Opportunity Form</h1>
+	<div class="container">
+		<form id="opp-form">
+			<h2>Opportunity Details</h2>
+			<div class="form-group">
+				<label for="opp_type">Opportunity Type:</label>
+				<select class="form-control" id="opp_type" name="opp_type">
+					<option value="internship">Internship</option>
+					<option value="placement">Placement</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="opp_title">Opportunity Title:</label>
+				<input type="text" class="form-control" id="opp_title" name="opp_title" required>
+			</div>
+			<div class="form-group">
+				<label for="address_line_1">Address Line 1:</label>
+				<input type="text" class="form-control" id="address_line_1" name="address_line_1" required>
+			</div>
+			<div class="form-group">
+				<label for="address_line_2">Address Line 2:</label>
+				<input type="text" class="form-control" id="address_line_2" name="address_line_2" required>
+			</div>
+			<div class="form-group">
+				<label for="address_line_3">Address Line 3:</label>
+				<input type="text" class="form-control" id="address_line_3" name="address_line_3" required>
+			</div>
+			<div class="form-group">
+				<label for="company_id">Company ID:</label>
+				<input type="number" class="form-control" id="company_id" name="company_id" required>
+			</div>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+		<form id="req-form">
+			<h2>Requirements</h2>
+			<div class="form-group">
+				<label for="opp_id">Opportunity ID:</label>
+				<input type="number" class="form-control" id="opp_id" name="opp_id" required>
+			</div>
+			<div class="form-group">
+				<label for="min_cpi_req">Minimum CPI Requirement:</label>
+				<input type="number" step="0.1" class="form-control" id="min_cpi_req" name="min_cpi_req" required>
+			</div>
+			<div class="form-group">
+				<label for="active_backlog">Active Backlog:</label>
+				<select class="form-control" id="active-backlog" name="active_backlog" required>
+                    <option value="">Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="program-req">Program Requirement:</label>
+                  <select class="form-control" id="program-req" name="program_req" required>
+                    <option value="">Select a program</option>
+                    <option value="btech">B.Tech</option>
+                    <option value="mtech">M.Tech</option>
+                    <option value="phd">PhD</option>
+                  </select>
+                </div>
+              </div>
+                <div class="form-group">
+                  <label for="dept-req">Department Requirement:</label>
+                  <select class="form-control" id="dept-req" name="dept_req" required>
+                    <option value="">Select a department</option>
+                    <option value="CSE">Computer Science and Engineering</option>
+                    <option value="EE">Electrical Engineering</option>
+                    <option value="ME">Mechanical Engineering</option>
+                    <option value="CE">Civil Engineering</option>
+                    <option value="CVE">Civil and Environmental Engineering</option>
+                    <option value="MSE">Materials Science and Engineering</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="year-req">Year Requirement:</label>
+                  <input type="text" class="form-control" id="year-req" name="year_req" required>
+                </div>
+                <div class="form-group">
+                  <label for="salary">Salary:</label>
+                  <input type="number" class="form-control" id="salary" name="salary" required>
+                </div>
+                <div class="form-group">
+                  <label for="opp-status">Opportunity Status:</label>
+                  <select class="form-control" id="opp-status" name="opp_status" required>
+                    <option value="">Select a status</option>
+                    <option value="open">Open</option>
+                    <option value="close">Close</option>
+                  </select>
+                </div>
+              <div class="form-group">
+                <label for="opp_req">Opportunity Requirements:</label>
+                <textarea class="form-control" id="opp_req" name="opp_req" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="posted_on">Posted On:</label>
+                <input type="date" class="form-control" id="posted_on" name="posted_on" required>
+            </div>
+            <div class="form-group">
+                <label for="deadline">Deadline:</label>
+                <input type="date" class="form-control" id="deadline" name="deadline" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            </body>
+        </form>
+        <script>
+
+            // Code to send data of the opportunity form:
+
+            $(document).ready(function() {
+                $('#opp-form').submit(function(event) {
+                  // Stop the form from submitting normally
+                  event.preventDefault();
+                  
+                  // Get the form data and convert it to a JSON object
+                  var formData = {
+                    opp_type: $('#opp_type').val(),
+                    opp_title: $('#opp_title').val(),
+                    address_line_1: $('#address_line_1').val(),
+                    address_line_2: $('#address_line_2').val(),
+                    address_line_3: $('#address_line_3').val(),
+                    company_id: $('#company_id').val()
+                  };
+                  
+                  var jsonData = JSON.stringify(formData);
+                  
+                  // Send the data using POST
+                  $.ajax({
+                    url: '/api/opportunity/new_opp',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: jsonData,
+                    success: function(response) {
+                      // Handle success
+                      console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                      // Handle error
+                      console.log(error);
+                    }
+                  });
+                });
+              });
+        // Code to send data of the requirement form:
+
+        const form = document.getElementById('req-form');
+  
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(form);
+          const jsonData = {};
+          
+          for (const [key, value] of formData.entries()) {
+            jsonData[key] = value;
+          }
+          
+          fetch('/api/opportunity/new_req', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(jsonData)
+          })
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error(error));
+        });
+        </script>
