@@ -57,8 +57,8 @@
 					var cardText = $('<p>').addClass('card-text').text(opportunity.address_line_1 + ' ' + opportunity.address_line_2 + ' ' + opportunity.address_line_3);
 					var cardFooter = $('<div>').addClass('card-footer');
 					var deadline = $('<small>').addClass('text-muted').text('Deadline: ' + opportunity.deadline);
-          				var companyName = $('<span>').addClass('float-right font-weight-bold').text(opportunity.company_name);
-				var showMoreButton = $('<a>').addClass('btn btn-primary').attr('href', '/opportunities/' + opportunity.opp_id).text('Show More');
+          			var companyName = $('<span>').addClass('float-right font-weight-bold').text(opportunity.company_name);
+					var showMoreButton = $('<a>').addClass('btn btn-primary').attr('href', '/opportunities/' + opportunity.opp_id).text('Show More');
 
 				cardBody.append(cardTitle, cardText);
 				cardFooter.append(deadline, companyName, showMoreButton);
