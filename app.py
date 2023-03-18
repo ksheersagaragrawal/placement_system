@@ -40,24 +40,47 @@ def index():
 ##### for student get requests#####
 @app.route('/opportunities')
 def get_opportunities():
+    # we need to check if the user is a student or not
     if(USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
+    
+    # get the student id and status from the request, request will be like: /opportunities?student_id=1&status=applied 
     student_id = request.args.get('student_id')
     status = request.args.get('status')
+
+    # if both student_id and status are not present, return all opportunities with their requirements
+    # TO DO: add check for active opportunities
     if student_id is None and status is None:
         cur = mysql.connection.cursor()
+
+        # we execute the query
         resultValue = cur.execute("SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id;")
+        
+        # get the field names(columns) of the query
         field_names = [i[0] for i in cur.description]
+
+        # if the query returns any results, we fetch all the results as a list of tuples and store it in opportunities
         if resultValue > 0:
+
+            # fetch all the results as a list of tuples and store it in opportunities
             opportunities = cur.fetchall()
+            
+
+            # below code segment is to convert the list of tuples to a list of dictionaries
             final_opportunities = []
             for j in range(len(opportunities)):
                 dict = {}
                 for i in range(len(cur.description)):
                     dict[field_names[i]] = opportunities[j][i]
                 final_opportunities.append(dict)
+            
+            # return the list of dictionaries as json response
             return jsonify(final_opportunities)
-    else:
+        
+
+    # if any both queried values are present, return the opportunities with the queried status
+    elif student_id is not None and status is not None:
+        # similar process as in the above if block is followed based on the conditions specified in the query
         cur = mysql.connection.cursor()
         if status == 'applied':
             query = "select * from selection_procedure where opp_id in (select opp_id from app_opp where student_id = %s)"
