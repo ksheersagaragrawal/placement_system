@@ -60,18 +60,50 @@
             </div>
             <div class="col">
               <form action="/student/opportunity_list" method="get" >
-                  <div class="dashboard-option">
-                      <button class="btn btn-primary" type="submit">Opportunities</button>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="opportunitiesDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Opportunities
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="opportunitiesDropdown">
+                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('eligible')">Eligible</a>
+                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('not eligible')">Not Eligible</a>
+                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('accepted')">Accepted</a>
+                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('rejected')">Rejected</a>
                   </div>
-              </form> 
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      <p>Welcome student! Please choose one of the options above.</p>
     </main>
+
     <footer>
       <p>Copyright &copy; 2023</p>
     </footer>
-  </body>
-</html> 
 
+    <script>
+      function handleOptionSelection(option) {
+        switch(option) {
+          case 'eligible':
+            // redirect to eligible.html
+            break;
+          case 'not eligible':
+            // redirect to not eligible.html
+            break;
+          case 'accepted':
+            // redirect to accepted.html
+            break;
+          case 'rejected':
+            // redirect to rejected.html
+            break;
+        }
+      }
+
+</script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,120 @@
+<!-- this is the basic template for the POC opportunities page --> 
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Opportunities</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+      body {
+        background-color: #F5F5F5;
+      }
+      .container {
+        background-color: #FFFFFF;
+        margin-top: 50px;
+        margin-bottom: 50px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+      }
+      .opportunity-card {
+        background-color: #EAEAEA;
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+      }
+      .opportunity-card:hover {
+        cursor: pointer;
+        background-color: #D9D9D9;
+      }
+      .round-checkbox {
+        margin-top: 10px;
+      }
+      .round-btn {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Opportunities</h2>
+      <div id="opportunities">
+        <!-- The opportunities will be dynamically generated using JavaScript -->
+      </div>
+    </div>
+
+    <!-- Modal for opportunity details -->
+    <div id="opportunity-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Opportunity Details</h4>
+          </div>
+          <div class="modal-body">
+            <div id="opportunity-details">
+              <!-- The opportunity details will be dynamically generated using JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function() {
+          // Get opportunities for this HR from API
+          $.get("http://localhost:5500/api/opportunity?status=rejected&student_id=" + {studentIdFromSession}, function(data, status) {
+            var opportunities = data;
+            const length = opportunities.length;
+            for (var i = 0; i < length; i++) {
+              var opportunity = opportunities[i];
+              var opportunity_card = "<div class='opportunity-card' data-opp-id='" + opportunity.opp_id + "'>";
+              opportunity_card += "<h4>" + opportunity.opp_title + "</h4>";
+              opportunity_card += "<p>" + opportunity.address_line_1 + ", " + opportunity.address_line_2 + ", " + opportunity.address_line_3 + "</p>";
+              opportunity_card += "<p>" + opportunity.opp_type + "</p>";
+              opportunity_card += "</div>";
+              $("#opportunities").append(opportunity_card);
+            }
+ 
+          });
+      
+
+
+          // Open modal and get opportunity details and students when an opportunity card is clicked
+          $(document).on("click", ".opportunity-card", function() {
+            var opp_id = $(this).data("opp-id");
+            $.get("http://localhost:5500/api/cds/opportunity/?opp_id=" + opp_id, function(data, status) {
+              var opportunityDetails = data;
+              $("#opportunity-details").html("");
+              for (var i = 0; i < opportunityDetails.length; i++) {
+                var oppDetails = opportunityDetails[i];
+                var oppDetails_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + oppDetails.opp_id + "'></td>";
+                oppDetails_row += "<td>" + oppDetails.opp_type + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.opp_title + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.company_id + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.min_cpi_req + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.active_backlog + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.program_req + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.dept_req + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.year_req + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.salary + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.opp_status + "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.posted_on+ "</td></tr>";
+                oppDetails_row += "<td>" + oppDetails.deadline + "</td></tr>";
+                
+                $("#opportunity-details").append(oppDetails_row);
+              }
+            });
+            $("#opportunity-modal").modal("show");
+          });
+      });
+    </script>
+  </body>
+</html>
+
