@@ -67,11 +67,23 @@
 			<input type="submit" value="Submit">
 		</form>
 	</div>
+
+    <table id = "view-opportunity-table" style = "display: none;">
+        <thead>
+          <tr>
+            <th>Opportunity ID</th>
+            <th>Opportunity Name</th>
+          </tr>
+        </thead>
+        <tbody id="opportunities-list">
+          <!-- Populate table rows dynamically with JavaScript -->
+        </tbody>
+    </table>
 	<script>
 		// Define API endpoints
 		const API_URL = 'http://example.com/api';
-		const OPPORTUNITIES_URL = `${API_URL}/opportunities`;
-		const CDS_OPPORTUNITY_URL = `${API_URL}/cds/opportunity`;
+		const OPPORTUNITIES_URL = `api/opportunities`;
+		const CDS_OPPORTUNITY_URL = `api/cds/opportunity`;
 
 		// Get button elements
 		const viewBtn = document.getElementById('view-btn');
@@ -83,11 +95,27 @@
 
 		// Function to handle view opportunities button click
 		function viewOpportunities() {
-			fetch(OPPORTUNITIES_URL)
-				.then(response => response.json())
-				.then(data => console.log(data))
-				.catch(error => console.error(error));
+            $('#view-opportunity-table').show();
+
+            fetch('api/opportunities')
+            .then((response) => response.json())
+            .then((data) => {
+            // Populate the table rows dynamically with the JSON data
+            const opportunitiesList = document.getElementById('opportunities-list');
+            data.forEach((opportunity) => {
+                const row = `
+                <tr>
+                    <td>${opportunity.opportunityID}</td>
+                    <td>${opportunity.opportunityName}</td>
+                    <td><button onclick="showMore('${opportunity.opportunityID}')">Show More</button></td>
+                </tr>
+                `;
+                opportunitiesList.insertAdjacentHTML('beforeend', row);
+            });
+            })
+            .catch((error) => console.error(error));
 		}
+
 
 		// Function to handle add opportunities button click
 		function showAddForm() {
