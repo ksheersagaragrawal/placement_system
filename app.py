@@ -340,7 +340,7 @@ def get_student_details_by_opportunity_id():
         # return the list of dictionaries as json response
         return jsonify(final_students)
     return jsonify("No matches were found for your search criteria")
-USER = Occupation.CDS_EMPLOYEE
+
 @app.route('/cds/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_cds_and_poc():
     if(USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
