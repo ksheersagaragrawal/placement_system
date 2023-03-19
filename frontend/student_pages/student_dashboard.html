@@ -59,19 +59,25 @@
               </form>
             </div>
             <div class="col">
-              <form action="/student/opportunity_list" method="get" >
                 <div class="dropdown">
                   <button class="btn btn-primary dropdown-toggle" type="button" id="opportunitiesDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Opportunities
                   </button>
                   <div class="dropdown-menu" aria-labelledby="opportunitiesDropdown">
-                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('eligible')">Eligible</a>
-                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('not eligible')">Not Eligible</a>
-                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('accepted')">Accepted</a>
-                    <a class="dropdown-item" href="#" onclick="handleOptionSelection('rejected')">Rejected</a>
+                      <form action="/student/opportunities/eligible" method="get">
+                          <button type="submit">Eligible</button>
+                      </form> 
+                      <form action="/student/opportunities/not_eligible" method="get">
+                          <button type="submit">Not Eligible</button>
+                      </form> 
+                      <form action="/student/opportunities/accepted" method="get">
+                          <button type="submit">Accepted</button>
+                      </form> 
+                      <form action="/student/opportunities/rejected" method="get">
+                          <button type="submit">Rejected</button>
+                      </form> 
                   </div>
                 </div>
-              </form>
             </div>
           </div>
         </div>

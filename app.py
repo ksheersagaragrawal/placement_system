@@ -1,6 +1,7 @@
 # pylint: disable=all
 import os
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for
+
 # from flask.ext.jsonpify import jsonify
 from flask_mysqldb import MySQL
 import yaml
@@ -43,7 +44,7 @@ def google():
     # here inside double quotes
     GOOGLE_CLIENT_ID = '515566156695-um1sos28i4a2ftr37eaot6l4clvlovjs.apps.googleusercontent.com'
     GOOGLE_CLIENT_SECRET = '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'
-     
+
     CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
     oauth.register(
         name='google',
@@ -54,7 +55,7 @@ def google():
             'scope': 'openid email profile',
         }
     )
-     
+
     # Redirect to google_auth function
     redirect_uri = url_for('google_auth', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
@@ -66,7 +67,7 @@ def google_auth():
     email = token["userinfo"]["email"]
     cur = mysql.connection.cursor()
     resultvalue = cur.execute(f"SELECT student_id FROM student where student_email_id = '{email}';")
-    
+
     if resultvalue==0:
         resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '{email}';")
         if resultvalue==0:
@@ -77,9 +78,9 @@ def google_auth():
     else:
         session['occupation']='student'
         session['student_id']=resultvalue
-        
+
     cur.close()
-    
+
     return redirect(url_for(session['url']))
 
 @app.route('/logout')
@@ -101,7 +102,7 @@ def index():
             USER = Occupation.COMPANY_POC
     if(USER ==Occupation.STUDENT ):
         student_id = session['student_id']
-    
+
     if request.method == 'POST':
         # Fetch form data
         userDetails = request.form
@@ -131,8 +132,8 @@ def get_opportunities():
         case 'poc':
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
-        student_id = session['student_id']        
-    
+        student_id = session['student_id']
+
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
 
@@ -218,7 +219,7 @@ def add_new_opportunity():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     print(request.get_json())
@@ -251,7 +252,7 @@ def add_requirements():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     requirements = request.get_json()
@@ -288,7 +289,7 @@ def delete_opportunity():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     opportunity = request.get_json()
@@ -398,7 +399,7 @@ def get_student_by_id():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
@@ -426,7 +427,7 @@ def get_resume_by_id():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
@@ -458,7 +459,7 @@ def get_opportunity_by_id_for_poc():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
     poc_email_id = request.args.get('poc_email_id')
@@ -476,7 +477,7 @@ def get_opportunity_by_id_for_poc():
                     dict[field_names[i]] = float(opportunities[j][i])
                 else: dict[field_names[i]] = opportunities[j][i]
             final_opportunities.append(dict)
-            
+
         # return the list of dictionaries as json response
         return jsonify(final_opportunities)
     return jsonify("No matches were found for your search criteria")
@@ -495,7 +496,7 @@ def get_opportunity_by_id_and_round_no_for_poc():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
     opp_id = request.args.get('opp_id')
@@ -513,7 +514,7 @@ def get_opportunity_by_id_and_round_no_for_poc():
                 if field_names[i] == 'CPI': dict[field_names[i]] = float(students[j][i])
                 else: dict[field_names[i]] = students[j][i]
             final_students.append(dict)
-            
+
         # return the list of dictionaries as json response
         return jsonify(final_students)
     return jsonify("No matches were found for your search criteria")
@@ -532,7 +533,7 @@ def get_student_details_by_opportunity_id():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if (USER != Occupation.COMPANY_POC and USER != Occupation.CDS_EMPLOYEE):
         return jsonify({"error": "Invalid Access"}), 404
     opp_id = request.args.get('opp_id')
@@ -566,7 +567,7 @@ def get_opportunity_by_id_for_cds_and_poc():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-        
+
     if(USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
@@ -581,7 +582,7 @@ def get_opportunity_by_id_for_cds_and_poc():
             dict = {}
             for i in range(len(cur.description)):
                 if field_names[i] == 'min_cpi_req': dict[field_names[i]] = float(opportunuities[j][i])
-                else: dict[field_names[i]] = opportunuities[j][i]
+                else dict[field_names[i]] = opportunuities[j][i]
             final_opportunuities.append(dict)
         # return the list of dictionaries as json response
         return jsonify(final_opportunuities)
