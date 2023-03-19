@@ -196,7 +196,7 @@ VALUES
 
 drop table if exists resume;
 CREATE TABLE resume (
-    resume_id INTEGER PRIMARY KEY,
+    resume_id INTEGER PRIMARY KEY auto_increment,
     resume_file VARCHAR(255) CHECK (resume_file REGEXP '^(http|https)://.+') NOT NULL,
     resume_file_name VARCHAR(255) NOT NULL
 );
