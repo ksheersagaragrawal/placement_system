@@ -218,7 +218,7 @@ def upload_image():
 
 @app.route('/api/opportunity', methods=['GET'])
 def get_opportunity_by_id():
-    if(USER != Occupation.STUDENT and USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
+    if(USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
@@ -266,7 +266,10 @@ def get_resume_by_id():
     return jsonify("No matches were found for your search criteria")
 
 
-@app.route('/poc/opportunity')
+
+##### for POC get requests#####
+
+@app.route('/poc/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_poc():
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
@@ -291,7 +294,7 @@ def get_opportunity_by_id_for_poc():
     return jsonify("No matches were found for your search criteria")
 
 
-@app.route('/poc/opportunity/student')
+@app.route('/poc/opportunity/student', methods=['GET'])
 def get_opportunity_by_id_and_round_no_for_poc():
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
@@ -316,7 +319,7 @@ def get_opportunity_by_id_and_round_no_for_poc():
     return jsonify("No matches were found for your search criteria")
 
 
-@app.route('/opportunity/selected')
+@app.route('/opportunity/selected', methods=['GET'])
 def get_student_details_by_opportunity_id():
     if (USER != Occupation.COMPANY_POC and USER != Occupation.CDS_EMPLOYEE):
         return jsonify({"error": "Invalid Access"}), 404
@@ -336,6 +339,28 @@ def get_student_details_by_opportunity_id():
             final_students.append(dict)
         # return the list of dictionaries as json response
         return jsonify(final_students)
+    return jsonify("No matches were found for your search criteria")
+USER = Occupation.CDS_EMPLOYEE
+@app.route('/cds/opportunity', methods=['GET'])
+def get_opportunity_by_id_for_cds_and_poc():
+    if(USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
+        return jsonify({"error": "Invalid Accesss"}), 404
+    opp_id = request.args.get('opp_id')
+    cur = mysql.connection.cursor()
+    resultValue = cur.execute(
+        "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        opportunuities = cur.fetchall()
+        final_opportunuities = []
+        for j in range(len(opportunuities)):
+            dict = {}
+            for i in range(len(cur.description)):
+                if field_names[i] == 'min_cpi_req': dict[field_names[i]] = float(opportunuities[j][i])
+                else: dict[field_names[i]] = opportunuities[j][i]
+            final_opportunuities.append(dict)
+        # return the list of dictionaries as json response
+        return jsonify(final_opportunuities)
     return jsonify("No matches were found for your search criteria")
 
 
