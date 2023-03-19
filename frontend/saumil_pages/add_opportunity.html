@@ -154,7 +154,7 @@
                   
                   // Send the data using POST
                   $.ajax({
-                    url: '/api/opportunity/new_opp',
+                    url: '/api/cds/opportunity',
                     type: 'POST',
                     contentType: 'application/json',
                     data: jsonData,
@@ -183,7 +183,7 @@
             jsonData[key] = value;
           }
           
-          fetch('/api/opportunity/new_req', {
+          fetch('/api/cds/requirements', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
