@@ -16,7 +16,7 @@ class Occupation(Enum):
 
 # Temporary hain, until we get the student id by session or login shit
 global student_id
-student_id = 3
+student_id = 1
 
 USER = Occupation.STUDENT
 
@@ -50,14 +50,14 @@ def index():
 ##### for student get requests#####
 
 
-@app.route('/opportunities')
+@app.route('/api/opportunities', methods=['GET'])
 def get_opportunities():
     # we need to check if the user is a student or not
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
 
     # get the student id and status from the request, request will be like: /opportunities?student_id=1&status=applied
-    student_id = request.args.get('student_id')
+
     status = request.args.get('status')
 
     # if both student_id and status are not present, return all opportunities with their requirements
@@ -216,14 +216,14 @@ def upload_image():
     return jsonify({"message": "Image uploaded successfully"}), 200
 
 
-@app.route('/opportunity')
+@app.route('/api/opportunity', methods=['GET'])
 def get_opportunity_by_id():
     if(USER != Occupation.STUDENT and USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
     resultValue = cur.execute(
-        "select * from opportunity where opp_id = %s", (opp_id,))
+        "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
     field_names = [i[0] for i in cur.description]
     if resultValue > 0:
         opportunity_desc = cur.fetchone()
@@ -233,14 +233,13 @@ def get_opportunity_by_id():
         return jsonify(dict)
     return jsonify("No matches were found for your search criteria")
     
-@app.route('/student')
+@app.route('/api/student', methods=['GET'])
 def get_student_by_id():
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
-    stud_id = request.args.get('student_id')
     cur = mysql.connection.cursor()
     resultValue = cur.execute(
-        "select * from student where student_id = %s", (stud_id,))
+        "select * from student where student_id = %s", (student_id,))
     field_names = [i[0] for i in cur.description]
     if resultValue > 0:
         student_desc = cur.fetchone()
@@ -249,6 +248,23 @@ def get_student_by_id():
             dict[field_names[i]] = student_desc[i]
         return jsonify(dict) 
     return jsonify("No matches were found for your search criteria")
+
+@app.route('/api/student/resume', methods=['GET'])
+def get_resume_by_id():
+    if (USER != Occupation.STUDENT):
+        return jsonify({"error": "Invalid Access"}), 404
+    cur = mysql.connection.cursor()
+    resultValue = cur.execute(
+        "select resume.resume_id, resume.resume_file, resume.resume_file_name from resume inner join app_opp on resume.resume_id = app_opp.resume_id where app_opp.student_id = %s", (student_id,))
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        res_desc = cur.fetchone()
+        dict = {}
+        for i in range(len(cur.description)):
+            dict[field_names[i]] = res_desc[i]
+        return jsonify(dict) 
+    return jsonify("No matches were found for your search criteria")
+
 
 @app.route('/poc/opportunity')
 def get_opportunity_by_id_for_poc():
