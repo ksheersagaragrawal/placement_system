@@ -587,6 +587,18 @@ def get_opportunity_by_id_for_cds_and_poc():
         return jsonify(final_opportunuities)
     return jsonify("No matches were found for your search criteria")
 
+@app.route('/poc')
+def poc():
+    return render_template('poc_pages/hr_dashboard.html')
+
+@app.route('/poc/my-opportunities')
+def poc_opportunities():
+    return render_template('poc_pages/opportunity_page.html')
+
+@app.route('/cds/student')
+def cds_student():
+    return render_template('cds_pages/cds_student_profiles.html')
+
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)
