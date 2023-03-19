@@ -581,8 +581,10 @@ def get_opportunity_by_id_for_cds_and_poc():
         for j in range(len(opportunuities)):
             dict = {}
             for i in range(len(cur.description)):
-                if field_names[i] == 'min_cpi_req': dict[field_names[i]] = float(opportunuities[j][i])
-                else dict[field_names[i]] = opportunuities[j][i]
+                if field_names[i] == 'min_cpi_req': 
+                    dict[field_names[i]] = float(opportunuities[j][i])
+                else :
+                    dict[field_names[i]] = opportunuities[j][i]
             final_opportunuities.append(dict)
         # return the list of dictionaries as json response
         return jsonify(final_opportunuities)
