@@ -140,10 +140,11 @@ def get_opportunities():
     # get the student id and status from the request, request will be like: /opportunities?student_id=1&status=applied
 
     status = request.args.get('status')
+    opp_id = request.args.get('opp_id')
 
     # if both student_id and status are not present, return all opportunities with their requirements
     # TO DO: add check for active opportunities
-    if student_id is None and status is None:
+    if status is None and opp_id is None:
         cur = mysql.connection.cursor()
 
         # we execute the query
@@ -171,7 +172,7 @@ def get_opportunities():
             return jsonify(final_opportunities)
 
     # if any both queried values are present, return the opportunities with the queried status
-    elif student_id is not None and status is not None:
+    elif status is not None and opp_id is None:
         # similar process as in the above if block is followed based on the conditions specified in the query
         cur = mysql.connection.cursor()
         if status == 'applied':
@@ -202,8 +203,48 @@ def get_opportunities():
                 return jsonify(final_opportunities)
         else:
             return jsonify({"error": "invalid status"}), 404
+    elif opp_id is not None and status is None:
+        cur = mysql.connection.cursor()
+        resultValue = cur.execute(
+        "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
+        field_names = [i[0] for i in cur.description]
+        if resultValue > 0:
+            opportunity_desc = cur.fetchone()
+            dict = {}
+            for i in range(len(cur.description)):
+                dict[field_names[i]] = opportunity_desc[i]
+        return jsonify(dict)
+
     return jsonify("No matches were found for your search criteria")
 
+# @app.route('/api/opportunities', methods=['GET'])
+# def get_opportunity_by_id():
+#     if not ('email' in session ):
+#         session['url'] = 'index'
+#         return redirect(url_for('google'))
+#     USER = session['occupation']
+#     match USER:
+#         case 'student':
+#             USER = Occupation.STUDENT
+#         case 'poc':
+#             USER = Occupation.COMPANY_POC
+#     if(USER == Occupation.STUDENT):
+#         student_id = session['student_id']
+        
+#     if(USER != Occupation.STUDENT):
+#         return jsonify({"error": "Invalid Accesss"}), 404
+#     opp_id = request.args.get('opp_id')
+#     cur = mysql.connection.cursor()
+#     resultValue = cur.execute(
+#         "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
+#     field_names = [i[0] for i in cur.description]
+#     if resultValue > 0:
+#         opportunity_desc = cur.fetchone()
+#         dict = {}
+#         for i in range(len(cur.description)):
+#             dict[field_names[i]] = opportunity_desc[i]
+#         return jsonify(dict)
+#     return jsonify("No matches were found for your search criteria")
 
 
 @app.route('/api/cds/opportunity', methods=['POST'])
@@ -300,6 +341,31 @@ def delete_opportunity():
     cur.close()
     return jsonify({"message": "Opportunity deleted successfully"}), 200
 
+@app.route('/api/student/apply', methods=['POST'])
+def apply():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+
+    if USER != Occupation.STUDENT:
+        return jsonify({"error": "Invalid Access"}), 404
+    opportunity = request.get_json()
+    resume_id = opportunity['resume_id']
+    opp_id = opportunity['opp_id']
+    cur = mysql.connection.cursor()
+    cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached,status) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1, 'eligible')")
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Opportunity deleted successfully"}), 200
+
 
 @app.route('/api/student/resume', methods=['POST'])
 def upload_resume():
@@ -357,34 +423,7 @@ def upload_image():
     return jsonify({"message": "Image uploaded successfully"}), 200
 
 
-@app.route('/api/opportunity', methods=['GET'])
-def get_opportunity_by_id():
-    if not ('email' in session ):
-        session['url'] = 'index'
-        return redirect(url_for('google'))
-    USER = session['occupation']
-    match USER:
-        case 'student':
-            USER = Occupation.STUDENT
-        case 'poc':
-            USER = Occupation.COMPANY_POC
-    if(USER == Occupation.STUDENT):
-        student_id = session['student_id']
-        
-    if(USER != Occupation.STUDENT):
-        return jsonify({"error": "Invalid Accesss"}), 404
-    opp_id = request.args.get('opp_id')
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute(
-        "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
-    field_names = [i[0] for i in cur.description]
-    if resultValue > 0:
-        opportunity_desc = cur.fetchone()
-        dict = {}
-        for i in range(len(cur.description)):
-            dict[field_names[i]] = opportunity_desc[i]
-        return jsonify(dict)
-    return jsonify("No matches were found for your search criteria")
+
     
 @app.route('/api/student', methods=['GET'])
 def get_student_by_id():
@@ -411,6 +450,7 @@ def get_student_by_id():
         dict = {}
         for i in range(len(cur.description)):
             dict[field_names[i]] = student_desc[i]
+        print(dict)
         return jsonify(dict) 
     return jsonify("No matches were found for your search criteria")
 
@@ -432,14 +472,17 @@ def get_resume_by_id():
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
     resultValue = cur.execute(
-        "select resume.resume_id, resume.resume_file, resume.resume_file_name from resume inner join app_opp on resume.resume_id = app_opp.resume_id where app_opp.student_id = %s", (student_id,))
+        "select * from resume where resume_id in (select resume_id from app_opp where student_id = %s)", (student_id,))
     field_names = [i[0] for i in cur.description]
     if resultValue > 0:
-        res_desc = cur.fetchone()
-        dict = {}
-        for i in range(len(cur.description)):
-            dict[field_names[i]] = res_desc[i]
-        return jsonify(dict) 
+        res_desc = cur.fetchall()
+        final_list = []
+        for j in range(len(res_desc)):
+            dict = {}
+            for i in range(len(cur.description)):
+                dict[field_names[i]] = res_desc[j][i]
+            final_list.append(dict)
+        return jsonify(final_list)
     return jsonify("No matches were found for your search criteria")
 
 
@@ -592,16 +635,109 @@ def get_opportunity_by_id_for_cds_and_poc():
 
 @app.route('/poc')
 def poc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
     return render_template('poc_pages/hr_dashboard.html')
 
 @app.route('/poc/my-opportunities')
 def poc_opportunities():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
     return render_template('poc_pages/opportunity_page.html')
 
 @app.route('/cds/student')
 def cds_student():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
     return render_template('cds_pages/cds_student_profiles.html')
 
+@app.route('/student')
+def student_dashboard():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
+    print(session['email'])
+    return render_template('student_pages/student_dashboard.html')
+
+@app.route('/student/profile')
+def student_profile():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
+    return render_template('student_pages/student_profile.html')
+
+@app.route('/student/resume')
+def resume_page():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
+    return render_template('student_pages/resume_page.html')
+
+@app.route('/student/opportunities/eligible')
+def eligible_page():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
+    return render_template('student_pages/eligible.html')
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)

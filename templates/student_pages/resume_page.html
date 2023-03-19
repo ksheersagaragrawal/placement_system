@@ -36,7 +36,7 @@
 			var resumeName = $('#resume_file_name').val();
 			var resumeLink = $('#resume_file_link').val();
 			var data = {'resume_file_name': resumeName, 'resume_file_link': resumeLink};
-			$.post('api/student/resume', JSON.stringify(data))
+			$.post('http://localhost:5000/api/student/resume', JSON.stringify(data))
 			.done(function(response) {
 				// Reload list of resumes
 				getResumes();
@@ -55,7 +55,7 @@
 		});
 
 		function getResumes() {
-			$.get('api/student/resume')
+			$.get('http://localhost:5000/api/student/resume')
 			.done(function(response) {
                 // Clear existing list
                 $('#resume-list').empty();
