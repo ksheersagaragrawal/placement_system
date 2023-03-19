@@ -1,10 +1,11 @@
 # pylint: disable=all
-
-from flask import Flask, render_template, request, redirect, jsonify
+import os
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for
 # from flask.ext.jsonpify import jsonify
 from flask_mysqldb import MySQL
 import yaml
 from enum import Enum
+from authlib.integrations.flask_client import OAuth
 import json
 
 
@@ -13,6 +14,7 @@ class Occupation(Enum):
     CDS_EMPLOYEE = 2
     COMPANY_POC = 3
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Temporary hain, until we get the student id by session or login shit
 global student_id
@@ -21,6 +23,8 @@ student_id = 1
 USER = Occupation.STUDENT
 
 app = Flask(__name__)
+app.secret_key = 'nvsiunvsidnsdnvnvi'
+app.config['SERVER_NAME'] = 'localhost:5000'
 
 # Configure db
 db = yaml.safe_load(open('db.yaml'))
@@ -30,10 +34,74 @@ app.config['MYSQL_PASSWORD'] = db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
+oauth = OAuth(app)
+@app.route('/google')
+def google():   
+    # Google Oauth Config
+    # Get client_id and client_secret from environment variables
+    # For developement purpose you can directly put it
+    # here inside double quotes
+    GOOGLE_CLIENT_ID = '515566156695-um1sos28i4a2ftr37eaot6l4clvlovjs.apps.googleusercontent.com'
+    GOOGLE_CLIENT_SECRET = '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'
+     
+    CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    oauth.register(
+        name='google',
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url=CONF_URL,
+        client_kwargs={
+            'scope': 'openid email profile',
+        }
+    )
+     
+    # Redirect to google_auth function
+    redirect_uri = url_for('google_auth', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@app.route('/google_auth')
+def google_auth():
+    token = oauth.google.authorize_access_token()
+    session['email'] = token["userinfo"]["email"]
+    email = token["userinfo"]["email"]
+    cur = mysql.connection.cursor()
+    resultvalue = cur.execute(f"SELECT student_id FROM student where student_email_id = '{email}';")
+    
+    if resultvalue==0:
+        resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '{email}';")
+        if resultvalue==0:
+            cur.close()
+            return jsonify({"error": "Invalid Access, contact Saumil Shah"}), 200
+        else:
+            session['occupation']='poc'
+    else:
+        session['occupation']='student'
+        session['student_id']=resultvalue
+        
+    cur.close()
+    
+    return redirect(url_for(session['url']))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return 'You have been logged out.'
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER ==Occupation.STUDENT ):
+        student_id = session['student_id']
+    
     if request.method == 'POST':
         # Fetch form data
         userDetails = request.form
@@ -53,6 +121,18 @@ def index():
 @app.route('/api/opportunities', methods=['GET'])
 def get_opportunities():
     # we need to check if the user is a student or not
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']        
+    
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
 
@@ -127,6 +207,18 @@ def get_opportunities():
 
 @app.route('/api/cds/opportunity', methods=['POST'])
 def add_new_opportunity():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     print(request.get_json())
@@ -148,6 +240,18 @@ def add_new_opportunity():
 
 @app.route('/api/cds/requirements', methods=['POST'])
 def add_requirements():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     requirements = request.get_json()
@@ -173,6 +277,18 @@ def add_requirements():
 
 @app.route('/api/cds/opportunity_delete', methods=['POST'])
 def delete_opportunity():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     opportunity = request.get_json()
@@ -186,6 +302,18 @@ def delete_opportunity():
 
 @app.route('/api/student/resume', methods=['POST'])
 def upload_resume():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if USER != Occupation.STUDENT:
         return jsonify({"error": "Invalid Access"}), 404
     resume = request.get_json()
@@ -202,6 +330,18 @@ def upload_resume():
 
 @app.route('/api/student/image', methods=['POST'])
 def upload_image():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if USER != Occupation.STUDENT:
         return jsonify({"error": "Invalid Access"}), 404
     image = request.get_json()
@@ -218,6 +358,18 @@ def upload_image():
 
 @app.route('/api/opportunity', methods=['GET'])
 def get_opportunity_by_id():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if(USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
@@ -235,6 +387,18 @@ def get_opportunity_by_id():
     
 @app.route('/api/student', methods=['GET'])
 def get_student_by_id():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
@@ -251,6 +415,18 @@ def get_student_by_id():
 
 @app.route('/api/student/resume', methods=['GET'])
 def get_resume_by_id():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
@@ -271,6 +447,18 @@ def get_resume_by_id():
 
 @app.route('/poc/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_poc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
     poc_email_id = request.args.get('poc_email_id')
@@ -296,6 +484,18 @@ def get_opportunity_by_id_for_poc():
 
 @app.route('/poc/opportunity/student', methods=['GET'])
 def get_opportunity_by_id_and_round_no_for_poc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if (USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Access"}), 404
     opp_id = request.args.get('opp_id')
@@ -321,6 +521,18 @@ def get_opportunity_by_id_and_round_no_for_poc():
 
 @app.route('/opportunity/selected', methods=['GET'])
 def get_student_details_by_opportunity_id():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if (USER != Occupation.COMPANY_POC and USER != Occupation.CDS_EMPLOYEE):
         return jsonify({"error": "Invalid Access"}), 404
     opp_id = request.args.get('opp_id')
@@ -343,6 +555,18 @@ def get_student_details_by_opportunity_id():
 
 @app.route('/cds/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_cds_and_poc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+        
     if(USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
@@ -365,4 +589,4 @@ def get_opportunity_by_id_for_cds_and_poc():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('localhost',5000,debug=True)
