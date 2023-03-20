@@ -908,7 +908,7 @@ def cds_page():
         case 'poc':
             USER = Occupation.COMPANY_POC
     if(session['email']!='mihirsutaria007@gmail.com'):
-        return 'fuck off'
+        return '. off'
     return render_template('saumil_pages/saumil_dashboard2.html')
 
 @app.route('/cds/view_opportunities')
@@ -923,7 +923,7 @@ def oppo_pages():
         case 'poc':
             USER = Occupation.COMPANY_POC
     if(session['email']!='mihirsutaria007@gmail.com'):
-        return 'fuck off'
+        return '. off'
     return render_template('saumil_pages/view_opportunities.html')
 
 @app.route('/cds/add_opportunity')
@@ -938,7 +938,7 @@ def oppoo_pages():
         case 'poc':
             USER = Occupation.COMPANY_POC
     if(session['email']!='mihirsutaria007@gmail.com'):
-        return 'fuck off'
+        return '. off'
     return render_template('saumil_pages/add_opportunity.html')
 
     
@@ -956,7 +956,7 @@ def oppooo_pages():
         case 'poc':
             USER = Occupation.COMPANY_POC
     if(session['email']!='mihirsutaria007@gmail.com'):
-        return 'fuck off'
+        return '. off'
     return render_template('saumil_pages/add_poc.html')
 
 @app.route('/api/poc/opportunities',methods = ['GET'])
@@ -1085,6 +1085,91 @@ def poooc():
         case 'poc':
             USER = Occupation.COMPANY_POC
     return render_template('student_pages/rejected.html')
+
+@app.route('/cds/student_profile')
+def pooooc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if session['email'] != 'mihirsutaria007@gmail.com':
+        return 'invalid accesss'
+    return render_template('cds_pages/cds_student_profiles.html')
+
+@app.route('/api/cds/student', methods=['GET'])
+def get_nahi_pata():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+    if (session['email']!='mihirsutaria007@gmail.com'):
+        return jsonify({"error": "Invalid Access"}), 404
+    
+    cur = mysql.connection.cursor()
+    query = "SELECT * FROM student;"
+    resultValue = cur.execute(query)
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        students = cur.fetchall()
+        final_students = []
+        for j in range(len(students)):
+            dict = {}
+            for i in range(len(cur.description)):
+                if field_names[i] == 'CPI': dict[field_names[i]] = float(students[j][i])
+                else: dict[field_names[i]] = students[j][i]
+            final_students.append(dict)
+        # return the list of dictionaries as json response
+        return jsonify(final_students)
+    return jsonify("No matches were found for your search criteria")
+
+@app.route('/api/cds/student', methods=['POST'])
+def get_nahiii_pata():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+    if (session['email']!='mihirsutaria007@gmail.com'):
+        return jsonify({"error": "Invalid Access"}), 404
+    data = request.get_json()
+    sid = data['student_id']
+    sfn = data['student_first_name']
+    smn = data['student_middle_name']
+    sln = data['student_last_name']
+    si = data['student_image']
+    dept = data['dept']
+    cpi = data['CPI']
+    ab = data['active_backlogs']
+    gen = data['gender']
+    sy = data['study_year']
+    
+    cur = mysql.connection.cursor()
+    query = f"UPDATE student set student_first_name='{sfn}',student_middle_name = '{smn}', student_last_name = '{sln}',student_image = '{si}',dept = '{dept}', CPI='{cpi}', active_backlogs='{ab}' where student_id = {sid} ;"
+    print(query)
+    resultValue = cur.execute(query)
+    mysql.connection.commit()
+    cur.close()
+    return 'successfully updated'
+
+
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)

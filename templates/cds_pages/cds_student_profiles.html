@@ -36,7 +36,10 @@
       </div>
       <div class="modal-body">
         <form id="edit-form">
-          <input type="hidden" id="edit-id">
+          <div class="form-group">
+            <label for="edit-first-name">Student Id: </label>
+            <input type="text" class="form-control" id="edit-student-id" required>
+          </div>
           <div class="form-group">
             <label for="edit-first-name">First Name:</label>
             <input type="text" class="form-control" id="edit-first-name" required>
@@ -51,7 +54,7 @@
           </div>
           <div class="form-group">
             <label for="edit-image">Image:</label>
-            <input type="file" class="form-control-file" id="edit-image">
+            <input type="text" class="form-control" id="edit-student-image" required>
           </div>
           <div class="form-group">
             <label for="edit-dept">Department:</label>
@@ -100,7 +103,7 @@
 <script>
   $(document).ready(function() {
     // Get the list of students from the API
-    $.get("http://localhost:5500/api/cds/student", function(data) {
+    $.get("http://localhost:5000/api/cds/student", function(data) {
       // Iterate through each student and create a card
       for (var i = 0; i < data.length; i++) {
         var student = data[i];
@@ -121,12 +124,12 @@
       $('#edit-modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
           for(var i = 0; i < data.length; i++){
-              var student = data[i];
-            $('#edit-id').val(student.student_id);
+            var student = data[i];
+            $('#edit-student-id').val(student.student_id);
             $('#edit-first-name').val(student.student_first_name);
             $('#edit-middle-name').val(student.student_middle_name);
             $('#edit-last-name').val(student.student_last_name);
-            $('#edit-image').val(null); // Clear the file input field
+            $('#edit-image').val(student.student_image); // Clear the file input field
             $('#edit-dept').val(student.dept);
             $('#edit-cpi').val(student.CPI);
             $('#edit-active-backlogs').val(student.active_backlogs);
@@ -138,7 +141,7 @@
       // Set up the event handler for when the save changes button is clicked
       $('#save-changes-btn').click(function() {
         var student = {
-          student_id: $('#edit-id').val(),
+          student_id: $('#edit-student-id').val(),
           student_first_name: $('#edit-first-name').val(),
           student_middle_name: $('#edit-middle-name').val(),
           student_last_name: $('#edit-last-name').val(),
@@ -146,18 +149,18 @@
           CPI: parseFloat($('#edit-cpi').val()),
           active_backlogs: $('#edit-active-backlogs').val(),
           gender: $('#edit-gender').val(),
-          study_year: parseInt($('#edit-study-year').val())
+          study_year: parseInt($('#edit-study-year').val()),
+          student_image: $('#edit-student-image').val()
         };
 
         // Make a POST request to the API to update the student
         $.ajax({
-          url: "http://localhost:5500/api/cds/student",
+          url: "http://localhost:5000/api/cds/student",
           type: "POST",
           contentType: "application/json",
           data: JSON.stringify(student),
           success: function(result) {
             // Reload the page to show the updated data
-            location.reload();
           },
           error: function(xhr, textStatus, errorThrown) {
             alert("Error updating student: " + xhr.responseText);
