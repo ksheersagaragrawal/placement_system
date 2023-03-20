@@ -89,8 +89,8 @@
     <script>
       $(document).ready(function() {
           // Get opportunities for this HR from API
-          var poc_email_id = "1"; // Replace with actual poc_email_id
-          $.get("http://localhost:5500/api/poc/opportunities?poc_email_id=" + poc_email_id, function(data, status) {
+          // poc_email_id is in backend
+          $.get("http://localhost:5000/api/poc/opportunities", function(data, status) {
             var opportunities = data;
             const length = opportunities.length;
             for (var i = 0; i < length; i++) {
@@ -107,7 +107,7 @@
           // Open modal and get opportunity details and students when an opportunity card is clicked
           $(document).on("click", ".opportunity-card", function() {
             var opp_id = $(this).data("opp-id");
-            $.get("http://localhost:5500/api/poc/opportunities/student?opp_id=" + opp_id, function(data, status) {
+            $.get("http://localhost:5000/api/poc/opportunities/student?opp_id=" + opp_id, function(data, status) {
               var students = data;
               $("#students").html("");
               for (var i = 0; i < students.length; i++) {

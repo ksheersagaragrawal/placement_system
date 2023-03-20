@@ -69,7 +69,9 @@ def google_auth():
     resultvalue = cur.execute("SELECT student_id FROM student where student_email_id = '"+email+"';")
 
     if resultvalue==0:
-        resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '{email}';")
+        resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '"+email+"';")
+        print(email)
+        print(resultvalue)
         if resultvalue==0:
             cur.close()
             session.clear()
@@ -82,7 +84,8 @@ def google_auth():
         session['student_id']=resultvalue
 
     cur.close()
-
+    if(session['occupation']=='poc'):
+        return redirect(url_for('poc'))
     return redirect(url_for(session['url']))
 
 @app.route('/logout')
@@ -263,6 +266,8 @@ def add_new_opportunity():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
+    if(session['email'] == 'mihirsutaria007@gmail.com'):
+        USER = Occupation.CDS_EMPLOYEE
 
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
@@ -296,6 +301,8 @@ def add_requirements():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
+    if(session['email'] == 'mihirsutaria007@gmail.com'):
+            USER = Occupation.CDS_EMPLOYEE
 
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
@@ -320,6 +327,8 @@ def add_requirements():
     cur.close()
     return jsonify({"message": "Requirements added successfully"}), 200
 
+    
+
 @app.route('/api/cds/opportunity_delete', methods=['POST'])
 def delete_opportunity():
     if not ('email' in session ):
@@ -333,13 +342,17 @@ def delete_opportunity():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
-
+    if(session['email']=='mihirsutaria007@gmail.com'):
+        USER = Occupation.CDS_EMPLOYEE
+        
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
     opportunity = request.get_json()
     opp_id = opportunity['opp_id']
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM opportunity WHERE opp_id = %s", (opp_id,))
+    cur.execute("DELETE FROM opportunity WHERE opp_id ="+str(opp_id))
+    mysql.connection.commit()
+    cur.execute("DELETE FROM point_of_contact WHERE opp_id ="+str(opp_id))
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "Opportunity deleted successfully"}), 200
@@ -364,7 +377,7 @@ def apply():
     resume_id = opportunity['resume_id']
     opp_id = opportunity['opp_id']
     cur = mysql.connection.cursor()
-    cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1)")
+    cur.execute(f"INSERT INTO app_opp(student_id, resume_id,OPP__ID,round_number_reached) VALUES({student_id}, {resume_id}, {opp_id}, 1)")
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "applied successfully"}), 200
@@ -430,7 +443,7 @@ def upload_resume():
     # print(f"INSERT INTO app_opp(student_id, resume_id) VALUES(%s, %s)", (student_id, resume_id))
     print("select resume_id from resume where resume_file='" + resume_file + "' and resume_file_name='"+resume_file_name+"'")
     print(resume_id)
-    cur.execute("INSERT INTO app_opp(student_id, resume_id) VALUES(%s, %s);", (student_id, resume_id))
+    cur.execute("INSERT INTO application(student_id, resume_id) VALUES(%s, %s);", (student_id, resume_id))
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "Resume uploaded successfully"}), 200
@@ -513,7 +526,7 @@ def get_resume_by_id():
         return jsonify({"error": "Invalid Access"}), 404
     cur = mysql.connection.cursor()
     resultValue = cur.execute(
-        "select * from resume where resume_id in (select resume_id from app_opp where student_id = %s)", (student_id,))
+        "select * from resume where resume_id in (select resume_id from application where student_id = %s)", (student_id,))
     field_names = [i[0] for i in cur.description]
     if resultValue > 0:
         res_desc = cur.fetchall()
@@ -619,7 +632,7 @@ def get_opportunity_by_id_and_round_no_for_poc():
     return jsonify("No matches were found for your search criteria")
 
 
-@app.route('/opportunity/selected', methods=['GET'])
+@app.route('/api/poc/opportunity/selected', methods=['GET'])
 def get_student_details_by_opportunity_id():
     if not ('email' in session ):
         session['url'] = 'index'
@@ -637,7 +650,7 @@ def get_student_details_by_opportunity_id():
         return jsonify({"error": "Invalid Access"}), 404
     opp_id = request.args.get('opp_id')
     cur = mysql.connection.cursor()
-    query = "SELECT * FROM student WHERE student.student_id in (SELECT application.student_id FROM application WHERE application.opp_id = %s);"
+    query = "SELECT * FROM student WHERE student.student_id in (SELECT app_opp.student_id FROM app_opp WHERE app_opp.opp_id = %s);"
     resultValue = cur.execute(query,(opp_id,))
     field_names = [i[0] for i in cur.description]
     if resultValue > 0:
@@ -653,7 +666,7 @@ def get_student_details_by_opportunity_id():
         return jsonify(final_students)
     return jsonify("No matches were found for your search criteria")
 
-@app.route('/cds/opportunity', methods=['GET'])
+@app.route('/api/cds/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_cds_and_poc():
     if not ('email' in session ):
         session['url'] = 'index'
@@ -666,28 +679,87 @@ def get_opportunity_by_id_for_cds_and_poc():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
+        
+    if(session['email']=='mihirsutaria007@gmail.com'):
+        USER = Occupation.CDS_EMPLOYEE
 
     if(USER != Occupation.CDS_EMPLOYEE and USER != Occupation.COMPANY_POC):
         return jsonify({"error": "Invalid Accesss"}), 404
     opp_id = request.args.get('opp_id')
-    cur = mysql.connection.cursor()
-    resultValue = cur.execute(
-        "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id = %s", (opp_id,))
-    field_names = [i[0] for i in cur.description]
-    if resultValue > 0:
-        opportunuities = cur.fetchall()
-        final_opportunuities = []
-        for j in range(len(opportunuities)):
-            dict = {}
-            for i in range(len(cur.description)):
-                if field_names[i] == 'min_cpi_req': 
-                    dict[field_names[i]] = float(opportunuities[j][i])
-                else :
-                    dict[field_names[i]] = opportunuities[j][i]
-            final_opportunuities.append(dict)
-        # return the list of dictionaries as json response
-        return jsonify(final_opportunuities)
+    if opp_id is None:
+        cur = mysql.connection.cursor()
+        resultValue = cur.execute(
+            "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id ")
+        field_names = [i[0] for i in cur.description]
+        if resultValue > 0:
+            opportunuities = cur.fetchall()
+            final_opportunuities = []
+            for j in range(len(opportunuities)):
+                dict = {}
+                for i in range(len(cur.description)):
+                    if field_names[i] == 'min_cpi_req': 
+                        dict[field_names[i]] = float(opportunuities[j][i])
+                    else :
+                        dict[field_names[i]] = opportunuities[j][i]
+                final_opportunuities.append(dict)
+            # return the list of dictionaries as json response
+            return jsonify(final_opportunuities)
+    if opp_id is not None:
+        cur = mysql.connection.cursor()
+        query = "SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id WHERE opportunity.opp_id ="+str(opp_id) +";"
+        resultValue = cur.execute(query)
+        field_names = [i[0] for i in cur.description]
+        if resultValue > 0:
+            opportunuities = cur.fetchall()
+            final_opportunuities = []
+            for j in range(len(opportunuities)):
+                dict = {}
+                for i in range(len(cur.description)):
+                    if field_names[i] == 'min_cpi_req': 
+                        dict[field_names[i]] = float(opportunuities[j][i])
+                    else :
+                        dict[field_names[i]] = opportunuities[j][i]
+                final_opportunuities.append(dict)
+            # return the list of dictionaries as json response
+            return jsonify(final_opportunuities)
+        
     return jsonify("No matches were found for your search criteria")
+
+
+@app.route('/api/cds/poc_add', methods=['POST'])
+def add_poccc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+    if(session['email'] == 'mihirsutaria007@gmail.com'):
+        USER = Occupation.CDS_EMPLOYEE
+
+    if USER != Occupation.CDS_EMPLOYEE:
+        return jsonify({"error": "Invalid Access"}), 404
+
+    emp_data = request.get_json()
+    employee_designation = emp_data['employee_designation']
+    employee_first_name = emp_data['employee_first_name']
+    employee_last_name = emp_data['employee_last_name']
+    employee_middle_name = emp_data['employee_middle_name']
+    opp_id = emp_data['opp_id']
+    poc_email_id = emp_data['poc_email_id']
+    
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO point_of_contact(employee_first_name,employee_middle_name,employee_last_name,employee_designation,opp_id,poc_email_id) VALUES(%s, %s, %s, %s, %s, %s)",
+                (employee_first_name,employee_middle_name,employee_last_name,employee_designation,opp_id,poc_email_id))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "poc added successfully"}), 200
+
 
 @app.route('/poc')
 def poc():
@@ -702,6 +774,7 @@ def poc():
             USER = Occupation.COMPANY_POC
     if(USER ==Occupation.STUDENT ):
         student_id = session['student_id']
+        return "access denied"
     return render_template('poc_pages/hr_dashboard.html')
 
 @app.route('/poc/my-opportunities')
@@ -793,6 +866,70 @@ def eligible_page():
     if(USER ==Occupation.STUDENT ):
         student_id = session['student_id']
     return render_template('student_pages/all.html')
+
+@app.route('/cds')
+def cds_page():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(session['email']!='mihirsutaria007@gmail.com'):
+        return 'fuck off'
+    return render_template('saumil_pages/saumil_dashboard2.html')
+
+@app.route('/cds/view_opportunities')
+def oppo_pages():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(session['email']!='mihirsutaria007@gmail.com'):
+        return 'fuck off'
+    return render_template('saumil_pages/view_opportunities.html')
+
+@app.route('/cds/add_opportunity')
+def oppoo_pages():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(session['email']!='mihirsutaria007@gmail.com'):
+        return 'fuck off'
+    return render_template('saumil_pages/add_opportunity.html')
+
+    
+    
+
+@app.route('/cds/add_poc')
+def oppooo_pages():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(session['email']!='mihirsutaria007@gmail.com'):
+        return 'fuck off'
+    return render_template('saumil_pages/add_poc.html')
+    
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)

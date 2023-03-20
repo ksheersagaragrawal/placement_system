@@ -209,36 +209,30 @@
     drop table if exists application;
     CREATE TABLE application (
         student_id INTEGER NOT NULL,
-        opp_id INTEGER,
         resume_id INTEGER NOT NULL,
-        PRIMARY KEY (student_id, opp_id, resume_id),
+        PRIMARY KEY (student_id, resume_id),
         foreign key (student_id) references student(student_id) on update cascade on delete cascade,
         foreign key (resume_id) references Resume(resume_id) on update cascade on delete cascade
     );
-    INSERT INTO application (student_id, opp_id, resume_id) 
-    VALUES (1, 1, 1);
-    INSERT INTO application (student_id, opp_id, resume_id) 
-    VALUES (2, 2, 2);
+    INSERT INTO application (student_id, resume_id) 
+    VALUES (1, 1);
+    INSERT INTO application (student_id,resume_id) 
+    VALUES (2, 2);
 
     drop table if exists app_opp;
     create table app_opp(
         student_id INTEGER NOT NULL,
-        opp_id INTEGER,
         resume_id INTEGER NOT NULL,
         OPP__ID integer,
         round_number_reached integer,
         status ENUM('eligible','not eligible','selected','rejected'),
-        foreign key (student_id, opp_id, resume_id) references application(student_id, opp_id, resume_id) on update cascade on delete cascade,
+        foreign key (student_id, resume_id) references application(student_id, resume_id) on update cascade on delete cascade,
         foreign key (OPP__ID) references opportunity(opp_id) on update cascade on delete cascade
     );
-    INSERT INTO app_opp (student_id, opp_id, resume_id, OPP__ID, round_number_reached, status)
-    VALUES (1, 1, 1, 1, 2, 'eligible');
-    INSERT INTO app_opp (student_id, opp_id, resume_id, OPP__ID, round_number_reached, status)
-    VALUES (2, 2, 2, 2, 0, 'eligible');
-
-    ALTER TABLE application
-    ADD CONSTRAINT opp_id
-    FOREIGN KEY (opp_id) REFERENCES app_opp(OPP__ID) on update cascade on delete cascade;
+    INSERT INTO app_opp (student_id,  resume_id, OPP__ID, round_number_reached, status)
+    VALUES (1, 1, 1, 2, 'eligible');
+    INSERT INTO app_opp (student_id, resume_id, OPP__ID, round_number_reached, status)
+    VALUES (2, 2, 2, 0, 'eligible');
 
     INSERT INTO student (student_id, student_first_name, student_middle_name, student_last_name, student_image, dept, CPI, active_backlogs, gender, study_year)
     VALUES
@@ -1258,4 +1252,7 @@
     CREATE INDEX app_opp_index ON app_opp(student_id,status);
     
     select * from app_opp where resume_id = 8;
+    
+    select * from opportunity where company_id =1;
+    select * from requirements;
 
