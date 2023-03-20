@@ -35,18 +35,26 @@
 			event.preventDefault();
 			var resumeName = $('#resume_file_name').val();
 			var resumeLink = $('#resume_file_link').val();
-			var data = {'resume_file_name': resumeName, 'resume_file_link': resumeLink};
-			$.post('http://localhost:5000/api/student/resume', JSON.stringify(data))
-			.done(function(response) {
-				// Reload list of resumes
-				getResumes();
-				// Reset form inputs
-				$('#resume_file_name').val('');
-				$('#resume_file_link').val('');
-			})
-			.fail(function(error) {
-				console.error(error);
-			});
+		
+		  var postData = {
+			resume_file_name: resumeName,
+			resume_file_link: resumeLink
+		  };
+		
+		  // Send the JSON object in the POST request
+		  $.ajax({
+			url: "http://localhost:5000/api/student/resume",
+			type: "POST",
+			contentType: "application/json",
+			data: JSON.stringify(postData),
+			success: function(data, status) {
+			  if (status == "success") {
+				alert("Resume submitted successfully.");
+			  } else {
+				alert("Resume submission failed.");
+			  }
+			}
+		  });
 		});
 
 		// Get list of existing resumes from API endpoint on page load
@@ -61,7 +69,7 @@
                 $('#resume-list').empty();
                 // Add each resume to the list
                 response.forEach(function(resume) {
-                    var listItem = '<li><strong>' + resume.resume_name + '</strong> (ID: ' + resume.resume_id + ') - <a href="' + resume.resume_link + '">Link</a></li>';
+                    var listItem = '<li><strong>' + resume.resume_file_name + '</strong> (ID: ' + resume.resume_id + ') - <a href="' + resume.resume_link + '">Link</a></li>';
                     $('#resume-list').append(listItem);
                 });
             })

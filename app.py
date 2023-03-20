@@ -66,7 +66,7 @@ def google_auth():
     session['email'] = token["userinfo"]["email"]
     email = token["userinfo"]["email"]
     cur = mysql.connection.cursor()
-    resultvalue = cur.execute(f"SELECT student_id FROM student where student_email_id = '{email}';")
+    resultvalue = cur.execute("SELECT student_id FROM student where student_email_id = '"+email+"';")
 
     if resultvalue==0:
         resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '{email}';")
@@ -76,6 +76,7 @@ def google_auth():
         else:
             session['occupation']='poc'
     else:
+        resultvalue = cur.fetchall()[0][0]
         session['occupation']='student'
         session['student_id']=resultvalue
 
@@ -133,6 +134,7 @@ def get_opportunities():
             USER = Occupation.COMPANY_POC
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
+        print(student_id)
 
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
@@ -263,7 +265,7 @@ def add_new_opportunity():
 
     if USER != Occupation.CDS_EMPLOYEE:
         return jsonify({"error": "Invalid Access"}), 404
-    print(request.get_json())
+
     opportunity = request.get_json()
     # Columns in opportunity table
     # opportunity (opp_type, opp_title, address_line_1, address_line_2, address_line_3, company_id)
@@ -341,7 +343,7 @@ def delete_opportunity():
     cur.close()
     return jsonify({"message": "Opportunity deleted successfully"}), 200
 
-@app.route('/api/student/apply', methods=['POST'])
+@app.route('/api/student/apply/', methods=['POST'])
 def apply():
     if not ('email' in session ):
         session['url'] = 'index'
@@ -360,6 +362,33 @@ def apply():
     opportunity = request.get_json()
     resume_id = opportunity['resume_id']
     opp_id = opportunity['opp_id']
+    cur = mysql.connection.cursor()
+    cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached,status) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1, 'eligible')")
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "applied successfully"}), 200
+
+@app.route('/api/poc/opportunity', methods=['POST'])
+def poc_opp():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+
+    if USER != Occupation.STUDENT:
+        return jsonify({"error": "Invalid Access"}), 404
+    opportunity = request.get_json()
+    resume_id = opportunity['student_id']
+    opp_id = opportunity['opp_id']
+    round_number = opportunity['round_numbr']
+    todo = opportunity['todo']
     cur = mysql.connection.cursor()
     cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached,status) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1, 'eligible')")
     mysql.connection.commit()
@@ -384,12 +413,23 @@ def upload_resume():
     if USER != Occupation.STUDENT:
         return jsonify({"error": "Invalid Access"}), 404
     resume = request.get_json()
+
     # Format resume (resume_id, resume_file VARCHAR(255) CHECK (resume_file REGEXP '^(http|https)://.+'), resume_file_name);
-    resume_file = resume['resume_file']
+    resume_file = resume['resume_file_link']
     resume_file_name = resume['resume_file_name']
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO resume(resume_file, resume_file_name) VALUES(%s, %s)",
+    cur.execute("INSERT INTO resume(resume_file, resume_file_name) VALUES(%s, %s);",
                 (resume_file, resume_file_name))
+    mysql.connection.commit()
+    cur.close()
+    cur = mysql.connection.cursor()
+    
+    resume_id = cur.execute("select * from resume where resume_file='" + resume_file + "' and resume_file_name='"+resume_file_name+"';")
+    resume_id = cur.fetchall()[0][0]
+    # print(f"INSERT INTO app_opp(student_id, resume_id) VALUES(%s, %s)", (student_id, resume_id))
+    print("select resume_id from resume where resume_file='" + resume_file + "' and resume_file_name='"+resume_file_name+"'")
+    print(resume_id)
+    cur.execute("INSERT INTO app_opp(student_id, resume_id) VALUES(%s, %s);", (student_id, resume_id))
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "Resume uploaded successfully"}), 200
@@ -450,7 +490,7 @@ def get_student_by_id():
         dict = {}
         for i in range(len(cur.description)):
             dict[field_names[i]] = student_desc[i]
-        print(dict)
+
         return jsonify(dict) 
     return jsonify("No matches were found for your search criteria")
 
@@ -691,7 +731,6 @@ def student_dashboard():
             USER = Occupation.COMPANY_POC
     if(USER ==Occupation.STUDENT ):
         student_id = session['student_id']
-    print(session['email'])
     return render_template('student_pages/student_dashboard.html')
 
 @app.route('/student/profile')

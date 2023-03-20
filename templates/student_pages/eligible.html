@@ -131,17 +131,31 @@
             });
 
             $(document).on("click", ".apply-now", function() {
-            var student_id = $(this).data("student-id");
-            var opp_id = $(this).data("opp-id");
-            $.post("http://localhost:5000/api/apply" + "&opp_id=" + opp_id, function(data, status) {
-                if (status == "success") {
-                alert("Application submitted successfully.");
-                } else {
-                alert("Application submission failed.");
+              var opp_id = $(this).data("opp-id");
+              var resume_id = $(".resume-dropdown[data-opp-id='" + opp_id + "']").val(); // Get the selected resume_id from the dropdown
+            
+              // Create the JSON object with opp_id and resume_id
+              var postData = {
+                opp_id: opp_id,
+                resume_id: resume_id
+              };
+            
+              // Send the JSON object in the POST request
+              $.ajax({
+                url: "http://localhost:5000/api/student/apply",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(postData),
+                success: function(data, status) {
+                  if (status == "success") {
+                    alert("Application submitted successfully.");
+                  } else {
+                    alert("Application submission failed.");
+                  }
                 }
-            });
-            });
+              });
 
+            });
       });
     </script>
   </body>

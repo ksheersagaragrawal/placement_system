@@ -161,7 +161,7 @@
     (1, 'dhyeythummar8@gmail.com','Samantha', '', 'Johnson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.8, 'no', 'female', 3),
     (2, 'shruhrid.banthia@iitgn.ac.in','Jack', 'Thomas', 'Doe', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'EE', 7.5, 'yes', 'male', 2),
     (3, 'dhyeykumar.thummar@iitgn.ac.in','Sarah', '', 'Wilson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CE', 8.2, 'no', 'female', 4),
-    (4, 'a','Jacob', 'Michael', 'Taylor', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'ME', 6.9, 'yes', 'male', 3),
+    (4, 'mihirsutaria007@gmail.com','Jacob', 'Michael', 'Taylor', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'ME', 6.9, 'yes', 'male', 3),
     (5, 'a','Emily', 'Rose', 'Clark', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'MSE', 9.1, 'no', 'female', 2);
 
     drop table if exists placement;
@@ -223,11 +223,11 @@
     drop table if exists app_opp;
     create table app_opp(
         student_id INTEGER NOT NULL,
-        opp_id INTEGER NOT NULL,
+        opp_id INTEGER,
         resume_id INTEGER NOT NULL,
-        OPP__ID integer not null,
-        round_number_reached integer NOT NULL,
-        status ENUM('eligible','not eligible','selected','rejected') NOT NULL,
+        OPP__ID integer,
+        round_number_reached integer,
+        status ENUM('eligible','not eligible','selected','rejected'),
         foreign key (student_id, opp_id, resume_id) references application(student_id, opp_id, resume_id) on update cascade on delete cascade,
         foreign key (OPP__ID) references opportunity(opp_id) on update cascade on delete cascade
     );
