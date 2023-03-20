@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Point of Contact Form</title>
+    <!-- Load Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Load Custom CSS -->
+    <style type="text/css">
+      .container {
+        margin-top: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Point of Contact Form</h2>
+      <form id="poc-form">
+        <div class="form-group">
+          <label for="employee_first_name">First Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="employee_first_name"
+            name="employee_first_name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="employee_middle_name">Middle Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="employee_middle_name"
+            name="employee_middle_name"
+          />
+        </div>
+        <div class="form-group">
+          <label for="employee_last_name">Last Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="employee_last_name"
+            name="employee_last_name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="employee_designation">Designation:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="employee_designation"
+            name="employee_designation"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="opp_id">Opp ID:</label>
+          <input
+            type="number"
+            class="form-control"
+            id="opp_id"
+            name="opp_id"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="poc_email_id">Email:</label>
+          <input
+            type="email"
+            class="form-control"
+            id="poc_email_id"
+            name="poc_email_id"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <!-- Load jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Handle Form Submission -->
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#poc-form").submit(function (event) {
+          event.preventDefault();
+          var formData = {
+            employee_first_name: $('input[name="employee_first_name"]').val(),
+            employee_middle_name: $('input[name="employee_middle_name"]').val(),
+            employee_last_name: $('input[name="employee_last_name"]').val(),
+            employee_designation: $('input[name="employee_designation"]').val(),
+            opp_id: $('input[name="opp_id"]').val(),
+            poc_email_id: $('input[name="poc_email_id"]').val(),
+          };
+
+          $.ajax({
+            url: "http://localhost:5000/api/cds/poc_add",
+            type: "POST",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            success: function (response) {
+              alert("Form submitted successfully.");
+              $("#poc-form")[0].reset();
+            },
+            error: function (xhr, status, error) {
+              alert("Error: " + error);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
