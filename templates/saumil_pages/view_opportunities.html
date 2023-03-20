@@ -94,19 +94,19 @@
               $("#opportunity-details").html("");
               for (var i = 0; i < opportunityDetails.length; i++) {
                 var oppDetails = opportunityDetails[i];
-                var oppDetails_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + oppDetails.opp_id + "'></td>";
-                oppDetails_row += "<td>" + oppDetails.opp_type + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.opp_title + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.company_id + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.min_cpi_req + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.active_backlog + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.program_req + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.dept_req + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.year_req + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.salary + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.opp_status + "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.posted_on+ "</td></tr>";
-                oppDetails_row += "<td>" + oppDetails.deadline + "</td></tr>";
+                var oppDetails_row = "<tr>";
+                oppDetails_row += "<td>" + "<b>Opportunity Type: </b>" + oppDetails.opp_type + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Opportunity Title: </b>"+oppDetails.opp_title + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Company ID: </b>"+oppDetails.company_id + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Min CPI Req: </b>"+oppDetails.min_cpi_req + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Active Backlog: </b>"+oppDetails.active_backlog + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Program Req: </b>"+oppDetails.program_req + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Dept Req: </b>"+oppDetails.dept_req + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Year Req: </b>"+oppDetails.year_req + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Salary: </b>"+oppDetails.salary + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Opportu Status: </b>"+oppDetails.opp_status + "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Posted On: </b>"+oppDetails.posted_on+ "</td></tr>";
+                oppDetails_row += "<td>" + "<b>Deadline: </b>"+oppDetails.deadline + "</td></tr>";
                 //oppDetails_row += "<p>" + "some text" + "</p>";
                 oppDetails_row += "<td><button class='delete-btn' data-opp-id='" + opp_id + "'>Delete</button></td></tr>";
                 $("#opportunity-details").append(oppDetails_row);
@@ -134,7 +134,6 @@
               });
             });
             $("#opportunity-modal").modal("show");
-
           });
       });
     </script>

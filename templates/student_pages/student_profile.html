@@ -44,7 +44,8 @@
 		<div class="row">
 			<div class="col-md-4 offset-md-4">
 				<div class="text-center">
-					<img class="profile-picture" src="" alt="Profile Picture">
+					<img class='profile-picture' src="">
+					<br>
 					<h1 id="student-name"></h1>
 					<div class="student-details">
 						<span class="label">Department:</span><span id="student-dept"></span>
@@ -77,11 +78,9 @@
 				$('#student-backlogs').text(data.active_backlogs);
 				$('#student-gender').text(data.gender);
 				$('#student-study-year').text(data.study_year);
-
+				$('.profile-picture').attr('src', data.student_image)
 				// Set the profile picture
-				if (data.student_image) {
-					$('.profile-picture').attr('src', 'data:image/png;base64,' + data.student_image);
-				} else {
+				if (data.student_image == NULL) {
 					$('.profile-picture').attr('src', 'default-profile-picture.png');
 				}
 			});

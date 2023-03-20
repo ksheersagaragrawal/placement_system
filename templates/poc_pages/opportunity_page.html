@@ -61,31 +61,20 @@
             <div id="opportunity-details">
               <!-- The opportunity details will be dynamically generated using JavaScript -->
             </div>
-            <div class="form-group">
-              <label for="round-number">Round Number:</label>
-              <input type="number" class="form-control" id="round-number">
-            </div>
             <table class="table">
               <thead>
                 <tr>
-                  <th></th>
                   <th>Name</th>
-                  <th>Round Number</th>
                 </tr>
               </thead>
               <tbody id="students">
                 <!-- The students will be dynamically generated using JavaScript -->
               </tbody>
             </table>
-            <div class="round-btn">
-              <button type="button" class="btn btn-success" id="accepted-btn">Accepted</button>
-              <button type="button" class="btn btn-primary" id="next-round-btn">Proceed to Next Round</button>
-            </div>
           </div>
         </div>
       </div>
     </div>
-
     <script>
       $(document).ready(function() {
           // Get opportunities for this HR from API
@@ -103,7 +92,7 @@
               $("#opportunities").append(opportunity_card);
             }
           });
-      
+
           // Open modal and get opportunity details and students when an opportunity card is clicked
           $(document).on("click", ".opportunity-card", function() {
             var opp_id = $(this).data("opp-id");
@@ -112,15 +101,65 @@
               $("#students").html("");
               for (var i = 0; i < students.length; i++) {
                 var student = students[i];
-                var student_row = "<tr><td><input type='checkbox' class='round-checkbox' data-student-id='" + student.student_id + "'></td>";
-                student_row += "<td>" + student.student_first_name + " " + student.student_second_name + " " + student.student_last_name + "</td>";
-                student_row += "<td>" + student.round_number + "</td></tr>";
+                var student_row = "<tr>";
+                student_row += "<td>" + student.student_first_name + " " + student.student_last_name + "</td>";
+                student_row += "<td><button class='proceed-btn' data-student-id='" + student.student_id + "' data-opp-id='" + opp_id + "'>Proceed</button></td>";
+                student_row += "<td><button class='reject-btn' data-student-id='" + student.student_id + "' data-opp-id='" + opp_id + "'>Reject</button></td></tr>";
                 $("#students").append(student_row);
               }
             });
             $("#opportunity-modal").modal("show");
           });
-      });
+
+
+          $(document).on("click", ".proceed-btn", function() {
+            var student_id = $(this).data("student-id");
+            var opp_id = $(this).data("opp-id");
+            var dataToSend = {
+              student_id: student_id,
+              opp_id: opp_id,
+              to_do: "proceed"
+            };
+            $.ajax({
+              url: "http://localhost:5000/api/poc/opportunity/student",
+              type: "POST",
+              data: JSON.stringify(dataToSend),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function(data, status) {
+                if (status == "success") {
+                  alert("Application submitted successfully.");
+                } else {
+                  alert("Application submission failed.");
+                }
+              }
+            });
+          });
+
+          $(document).on("click", ".reject-btn", function() {
+            var student_id = $(this).data("student-id");
+            var opp_id = $(this).data("opp-id");
+            var dataToSend = {
+              student_id: student_id,
+              opp_id: opp_id,
+              to_do: "reject"
+            };
+            $.ajax({
+              url: "http://localhost:5000/api/poc/opportunity/student",
+              type: "POST",
+              data: JSON.stringify(dataToSend),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function(data, status) {
+                if (status == "success") {
+                  alert("Application submitted successfully.");
+                } else {
+                  alert("Application submission failed.");
+                }
+              }
+            });
+          });
+        });
     </script>
   </body>
 </html>

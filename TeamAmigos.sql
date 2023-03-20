@@ -111,7 +111,7 @@
     poc_email_id VARCHAR(255) CHECK (poc_email_id REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') PRIMARY KEY
     );
 
-    INSERT INTO point_of_contact VALUES ('John', '', 'Doe', 'HR Manager', 1, 'john.doe@example.com');
+    INSERT INTO point_of_contact VALUES ('John', '', 'Doe', 'HR Manager', 1, 'vefnv@gmail.com');
     INSERT INTO point_of_contact VALUES ('Jane', '', 'Smith', 'Recruiter', 2, 'jane.smith@example.com');
     INSERT INTO point_of_contact VALUES ('David', '', 'Lee', 'Internship Coordinator', 3, 'david.lee@example.com');
     INSERT INTO point_of_contact VALUES ('Rachel', 'K', 'Johnson', 'Placement Coordinator', 4, 'rachel.johnson@example.com');
@@ -146,7 +146,7 @@
         student_first_name VARCHAR(255) NOT NULL,
         student_middle_name VARCHAR(255),
         student_last_name VARCHAR(255) NOT NULL,
-        student_image BLOB,
+        student_image VARCHAR(255),
         dept ENUM('CSE','EE','ME','CE','CVE','MSE') NOT NULL,
         CPI DECIMAL(3,2) CHECK (CPI >= 0 AND CPI <= 10) NOT NULL,
         active_backlogs ENUM('yes','no') NOT NULL,
@@ -158,11 +158,11 @@
 
     INSERT INTO student (student_id, student_email_id, student_first_name, student_middle_name, student_last_name, student_image, dept, CPI, active_backlogs, gender, study_year)
     VALUES
-    (1, 'mihirsutaria007@gmail.com','Samantha', '', 'Johnson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.8, 'no', 'female', 3),
-    (2, 'shruhrid.banthia@iitgn.ac.in','Shruhrid', 'bunty', 'Doe', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'EE', 9.9, 'yes', 'male', 2),
-    (3, 'dhyeykumar.thummar@iitgn.ac.in','Sarah', '', 'Wilson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CE', 8.2, 'no', 'female', 4),
-    (4, 'a','Mihir', 'Michael', 'Taylor', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.9, 'yes', 'male', 3),
-    (5, 'dhyeythummar8@gmail.com','Emily', 'Rose', 'Clark', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'MSE', 9.1, 'no', 'female', 2);
+    (1, 'mihirsutaria007@gmail.com','Samantha', '', 'Johnson', 'https://drive.google.com/uc?export=view&id=18bYTlYqoilSHHO2rBEGKYRW_JE4FZ05i', 'CSE', 9.8, 'no', 'female', 3),
+    (2, 'shruhrid.banthia@iitgn.ac.in','Shruhrid', 'bunty', 'Doe', NULL, 'EE', 9.9, 'yes', 'male', 2),
+    (3, 'dhyeykumar.thummar@iitgn.ac.in','Sarah', '', 'Wilson',NULL, 'CE', 8.2, 'no', 'female', 4),
+    (4, 'a','Mihir', 'Michael', 'Taylor', NULL, 'CSE', 9.9, 'yes', 'male', 3),
+    (5, 'dhyeythummar8@gmail.com','Emily', 'Rose', 'Clark', NULL, 'MSE', 9.1, 'no', 'female', 2);
 
     drop table if exists placement;
     CREATE TABLE placement (
@@ -230,7 +230,7 @@
         foreign key (OPP__ID) references opportunity(opp_id) on update cascade on delete cascade
     );
     INSERT INTO app_opp (student_id,  resume_id, OPP__ID, round_number_reached, status)
-    VALUES (1, 1, 1, 2, 'eligible');
+    VALUES (1, 1, 1, 2, 'rejected');
     INSERT INTO app_opp (student_id, resume_id, OPP__ID, round_number_reached, status)
     VALUES (2, 2, 2, 0, 'eligible');
 
@@ -1255,4 +1255,7 @@
     
     select * from opportunity where company_id =1;
     select * from requirements;
+    
+    select * from point_of_contact
+    
 

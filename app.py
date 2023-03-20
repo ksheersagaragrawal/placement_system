@@ -139,6 +139,7 @@ def get_opportunities():
     if(USER == Occupation.STUDENT):
         student_id = session['student_id']
         print(student_id)
+    # student_id = 1
 
     if (USER != Occupation.STUDENT):
         return jsonify({"error": "Invalid Access"}), 404
@@ -194,7 +195,33 @@ def get_opportunities():
                         dict[field_names[i]] = opportunities[j][i]
                     final_opportunities.append(dict)
                 return jsonify(final_opportunities)
-        elif status == 'rejected' or status == 'all' or status == 'accepted':
+        elif status == 'selected':
+            query = "select * from opportunity where opp_id in (select OPP__ID from app_opp where app_opp.status = 'selected' and app_opp.student_id =" +str(student_id)+");"
+            resultValue = cur.execute(query)
+            field_names = [i[0] for i in cur.description]
+            if resultValue > 0:
+                opportunities = cur.fetchall()
+                final_opportunities = []
+                for j in range(len(opportunities)):
+                    dict = {}
+                    for i in range(len(cur.description)):
+                        dict[field_names[i]] = opportunities[j][i]
+                    final_opportunities.append(dict)
+                return jsonify(final_opportunities)
+        elif status == 'rejected':
+            query = "select * from opportunity where opp_id in (select OPP__ID from app_opp where app_opp.status = 'rejected' and app_opp.student_id =" +str(student_id)+");"
+            resultValue = cur.execute(query)
+            field_names = [i[0] for i in cur.description]
+            if resultValue > 0:
+                opportunities = cur.fetchall()
+                final_opportunities = []
+                for j in range(len(opportunities)):
+                    dict = {}
+                    for i in range(len(cur.description)):
+                        dict[field_names[i]] = opportunities[j][i]
+                    final_opportunities.append(dict)
+                return jsonify(final_opportunities)
+        elif status == 'all':
             query = "select * from opportunity"
             resultValue = cur.execute(query)
             field_names = [i[0] for i in cur.description]
@@ -666,6 +693,8 @@ def get_student_details_by_opportunity_id():
         return jsonify(final_students)
     return jsonify("No matches were found for your search criteria")
 
+
+
 @app.route('/api/cds/opportunity', methods=['GET'])
 def get_opportunity_by_id_for_cds_and_poc():
     if not ('email' in session ):
@@ -929,7 +958,133 @@ def oppooo_pages():
     if(session['email']!='mihirsutaria007@gmail.com'):
         return 'fuck off'
     return render_template('saumil_pages/add_poc.html')
+
+@app.route('/api/poc/opportunities',methods = ['GET'])
+def oppoooo_pages():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if USER==Occupation.STUDENT:
+        return 'invalid access'
     
+    cur = mysql.connection.cursor()
+    email = session['email']
+    resultValue = cur.execute("SELECT * FROM opportunity INNER JOIN requirements ON opportunity.opp_id = requirements.opp_id where opportunity.opp_id in (select opp_id from point_of_contact where poc_email_id='"+email+"')")
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        opps = cur.fetchall()
+        final_opps = []
+        for j in range(len(opps)):
+            dict = {}
+            for i in range(len(cur.description)):
+                dict[field_names[i]] = opps[j][i]
+            final_opps.append(dict)
+        # return the list of dictionaries as json response
+        return jsonify(final_opps)
+    return jsonify("No matches were found for your search criteria")
+
+@app.route('/api/poc/opportunities/student',methods = ['GET'])
+def oppooooo_pages():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if USER==Occupation.STUDENT:
+        return 'invalid access'
+
+    opp_id = request.args.get('opp_id')
+    cur = mysql.connection.cursor()
+    email = session['email']
+    print("SELECT * from student where student_id in (select student_id from app_opp where opp_id="+opp_id+" and status != 'rejected'  )")
+    resultValue = cur.execute("SELECT * from student where student.student_id in (select student_id from app_opp where OPP__ID="+opp_id+" and status != 'rejected'  )")
+    field_names = [i[0] for i in cur.description]
+    if resultValue > 0:
+        opps = cur.fetchall()
+        final_opps = []
+        for j in range(len(opps)):
+            dict = {}
+            for i in range(len(cur.description)):
+                dict[field_names[i]] = opps[j][i]
+            final_opps.append(dict)
+        # return the list of dictionaries as json response
+        print(jsonify(final_opps))
+        return jsonify(final_opps)
+    return jsonify("No matches were found for your search criteria")
+
+@app.route('/api/poc/opportunity/student', methods=['POST'])
+def student_result():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+    if(session['email'] == 'mihirsutaria007@gmail.com'):
+        USER = Occupation.CDS_EMPLOYEE
+
+    if USER != Occupation.CDS_EMPLOYEE:
+        return jsonify({"error": "Invalid Access"}), 404
+
+    data = request.get_json()
+    opp_id = data['opp_id']
+    to_do = data['to_do']
+    stud_id = data['student_id']
+    cur = mysql.connection.cursor()
+    if to_do == 'proceed':
+        query = "UPDATE app_opp SET status = 'selected' WHERE app_opp.OPP__ID = "+str(opp_id)+" and app_opp.student_id = "+str(stud_id)+";" 
+        print(query)
+        cur.execute(query)
+        mysql.connection.commit()
+        cur.close()
+    elif to_do == 'reject':
+        query = "UPDATE app_opp SET status = 'rejected' WHERE app_opp.OPP__ID = opportunity."+str(opp_id)+" and app_opp.student_id ="+str(stud_id)+";"
+        print(query)
+        cur.execute(query)
+        mysql.connection.commit()
+        cur.close()
+    return jsonify({"message": "poc added successfully"}), 200
+
+@app.route('/student/opportunities/accepted')
+def pooc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    return render_template('student_pages/accepted.html')
+
+@app.route('/student/opportunities/rejected')
+def poooc():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    return render_template('student_pages/rejected.html')
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)
