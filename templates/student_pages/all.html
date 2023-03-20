@@ -70,7 +70,7 @@
     <script>
       $(document).ready(function() {
           // Get opportunities for this HR from API
-          $.get("http://localhost:5000/api/opportunities?status=eligible",function(data, status) {
+          $.get("http://localhost:5000/api/opportunities?status=all",function(data, status) {
             var opportunities = data;
             const length = opportunities.length;
             for (var i = 0; i < length; i++) {

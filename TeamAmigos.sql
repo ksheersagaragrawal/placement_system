@@ -158,11 +158,11 @@
 
     INSERT INTO student (student_id, student_email_id, student_first_name, student_middle_name, student_last_name, student_image, dept, CPI, active_backlogs, gender, study_year)
     VALUES
-    (1, 'dhyeythummar8@gmail.com','Samantha', '', 'Johnson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.8, 'no', 'female', 3),
-    (2, 'shruhrid.banthia@iitgn.ac.in','Jack', 'Thomas', 'Doe', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'EE', 7.5, 'yes', 'male', 2),
+    (1, 'mihirsutaria007@gmail.com','Samantha', '', 'Johnson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.8, 'no', 'female', 3),
+    (2, 'shruhrid.banthia@iitgn.ac.in','Shruhrid', 'bunty', 'Doe', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'EE', 9.9, 'yes', 'male', 2),
     (3, 'dhyeykumar.thummar@iitgn.ac.in','Sarah', '', 'Wilson', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CE', 8.2, 'no', 'female', 4),
-    (4, 'mihirsutaria007@gmail.com','Jacob', 'Michael', 'Taylor', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'ME', 6.9, 'yes', 'male', 3),
-    (5, 'a','Emily', 'Rose', 'Clark', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'MSE', 9.1, 'no', 'female', 2);
+    (4, 'a','Mihir', 'Michael', 'Taylor', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'CSE', 9.9, 'yes', 'male', 3),
+    (5, 'dhyeythummar8@gmail.com','Emily', 'Rose', 'Clark', LOAD_FILE('/Users/sanskarsharma/Desktop/sample_image/sample_image.png'), 'MSE', 9.1, 'no', 'female', 2);
 
     drop table if exists placement;
     CREATE TABLE placement (
@@ -1256,4 +1256,6 @@
     CREATE INDEX requirements_index ON requirements(min_cpi_req,opp_status,program_req, dept_req);
     CREATE INDEX application_index ON application(student_id);
     CREATE INDEX app_opp_index ON app_opp(student_id,status);
+    
+    select * from app_opp where resume_id = 8;
 

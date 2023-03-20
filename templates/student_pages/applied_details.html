@@ -75,7 +75,7 @@
       $(document).ready(function () {
         // Get opportunities for this HR from API
         $.get(
-          "http://localhost:5000/api/opportunity?status=applied",
+          "http://localhost:5000/api/opportunities?status=applied",
           function (data, status) {
             var opportunities = data;
             const length = opportunities.length;
@@ -100,7 +100,7 @@
         $(document).on("click", ".opportunity-card", function () {
           var opp_id = $(this).data("opp-id");
           $.get(
-            "http://localhost:5000/api/cds/opportunity/?opp_id=" + opp_id,
+            "http://localhost:5000/api/cds/opportunities/?opp_id=" + opp_id,
             function (data, status) {
               var opportunityDetails = data;
               $("#opportunity-details").html("");

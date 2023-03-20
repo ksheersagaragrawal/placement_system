@@ -72,6 +72,7 @@ def google_auth():
         resultvalue = cur.execute(f"SELECT poc_email_id FROM point_of_contact where poc_email_id = '{email}';")
         if resultvalue==0:
             cur.close()
+            session.clear()
             return jsonify({"error": "Invalid Access, contact Saumil Shah"}), 200
         else:
             session['occupation']='poc'
@@ -190,9 +191,9 @@ def get_opportunities():
                         dict[field_names[i]] = opportunities[j][i]
                     final_opportunities.append(dict)
                 return jsonify(final_opportunities)
-        elif status == 'rejected' or status == 'eligible' or status == 'not_eligible' or status == 'accepted':
-            query = "select * from opportunity where opp_id in (select opp_id from app_opp where student_id = %s)"
-            resultValue = cur.execute(query, (student_id,))
+        elif status == 'rejected' or status == 'all' or status == 'accepted':
+            query = "select * from opportunity"
+            resultValue = cur.execute(query)
             field_names = [i[0] for i in cur.description]
             if resultValue > 0:
                 opportunities = cur.fetchall()
@@ -363,7 +364,7 @@ def apply():
     resume_id = opportunity['resume_id']
     opp_id = opportunity['opp_id']
     cur = mysql.connection.cursor()
-    cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached,status) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1, 'eligible')")
+    cur.execute(f"INSERT INTO app_opp(student_id, opp_id, resume_id,OPP__ID,round_number_reached) VALUES({student_id}, {opp_id}, {resume_id}, {opp_id}, 1)")
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "applied successfully"}), 200
@@ -524,6 +525,21 @@ def get_resume_by_id():
             final_list.append(dict)
         return jsonify(final_list)
     return jsonify("No matches were found for your search criteria")
+
+@app.route('/student/opportunities/applied', methods=['GET'])
+def applied_list():
+    if not ('email' in session ):
+        session['url'] = 'index'
+        return redirect(url_for('google'))
+    USER = session['occupation']
+    match USER:
+        case 'student':
+            USER = Occupation.STUDENT
+        case 'poc':
+            USER = Occupation.COMPANY_POC
+    if(USER == Occupation.STUDENT):
+        student_id = session['student_id']
+    return render_template('student_pages/applied_details.html')
 
 
 
@@ -763,7 +779,7 @@ def resume_page():
         student_id = session['student_id']
     return render_template('student_pages/resume_page.html')
 
-@app.route('/student/opportunities/eligible')
+@app.route('/student/opportunities/all')
 def eligible_page():
     if not ('email' in session ):
         session['url'] = 'index'
@@ -776,7 +792,7 @@ def eligible_page():
             USER = Occupation.COMPANY_POC
     if(USER ==Occupation.STUDENT ):
         student_id = session['student_id']
-    return render_template('student_pages/eligible.html')
+    return render_template('student_pages/all.html')
 
 if __name__ == '__main__':
     app.run('localhost',5000,debug=True)
