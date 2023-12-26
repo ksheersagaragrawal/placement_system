@@ -1,8 +1,30 @@
-# placement_system 
+# Placement System
 
-### server.js file 
-i have added the server.js file for frontend people to test their api endpoints and get preview of web pages  
+## About
+**Placement System** is an open-source web application designed for career fairs and recruitment drives on college campuses. It facilitates communication between recruiters and students for internships and new graduate roles.
 
+## Features
+- **Recruiter Dashboard**: Manage opportunities, view student profiles, and track applications.
+- **Student Interface**: View and apply for roles, manage profiles.
+- **Coordinator Dashboard**: Oversee recruitment, add opportunities, coordinate between students and recruiters.
 
-### these files have verified names for keys of get and post requests 
-- student_pages/resume_page
+## Repository Structure
+- `app.py`: Main Flask application.
+- JavaScript files: `redirect_student.js`, `server.js`.
+- HTML Templates: `cds_pages`, `saumil_pages`, `poc_pages`, `student_pages`.
+- SQL Scripts: `TeamAmigos.sql`.
+- `requirements.txt`: Python dependencies.
+- `db.yaml`: Database configuration.
+
+## Installation and Setup
+1. Clone the Repository: `git clone [repository-url]`
+2. Install Dependencies: `pip install -r requirements.txt`
+3. Database Setup: Use `TeamAmigos.sql`.
+4. Configuration: Update `db.yaml` with database credentials.
+5. Run the Application: `python app.py`
+
+## Reports
+Reports (`DB_A2.pdf`, `DB_A3.pdf`, `DB_A4.pdf`) detail development phases, database design, and features.
+
+## Contribution
+Contributions are welcome. Follow coding standards and submit pull requests for enhancements.
