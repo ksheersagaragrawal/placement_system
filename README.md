@@ -24,7 +24,9 @@
 5. Run the Application: `python app.py`
 
 ## Reports
-Reports (`DB_A2.pdf`, `DB_A3.pdf`, `DB_A4.pdf`) detail development phases, database design, and features.
+1. View the ER diagram : [Link](https://drive.google.com/file/d/1EdMChBSphpZ9cEx50h36_B1W9RiAIyUy/view?usp=sharing)
+2. Reports (`DB_A2.pdf`, `DB_A3.pdf`, `DB_A4.pdf`) detail development phases, database design, and features.
+
 
 ## Contribution
 Contributions are welcome. Follow coding standards and submit pull requests for enhancements.
